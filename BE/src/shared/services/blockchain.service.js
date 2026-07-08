@@ -1,15 +1,16 @@
 import { provider, didRegistry, credentialRegistry } from "../../configs/blockchain.js";
-import env from "../../configs/env.js";
-
-const { SEPOLIA_DID_CONTRACT_ADDRESS, SEPOLIA_CREDENTIAL_CONTRACT_ADDRESS } = env;
 
 export const checkBlockchainConnection = async () => {
     try {
         const network = await provider.getNetwork();
 
-        const didCode = await provider.getCode(SEPOLIA_DID_CONTRACT_ADDRESS);
+        const didCode = await provider.getCode(
+            await didRegistry.getAddress()
+        );
 
-        const credentialCode = await provider.getCode(SEPOLIA_CREDENTIAL_CONTRACT_ADDRESS);
+        const credentialCode = await provider.getCode(
+            await credentialRegistry.getAddress()
+        );
 
         return {
             connected: true,
