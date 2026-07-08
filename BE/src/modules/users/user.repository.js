@@ -7,6 +7,9 @@ const UserRepositpry = {
     findUserByWalletAddress: async (walletAddress) => {
         return await User.findOne({ walletAddress });
     },
+    findUserById: async (id) => {
+        return await User.findById(id);
+    },
     updateUserRole: async (walletAddress, role) => {
         return await User.updateOne({ walletAddress }, { role });
     },

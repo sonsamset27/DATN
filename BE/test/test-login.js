@@ -5,7 +5,7 @@ const wallet = new Wallet(
     "0x29b78e32ac4b74d83f1b54241af9dc12f00fde9597d2a7d46264c44e6799f4bc"
 );
 
-const nonce = "cc3592f42806f900d036c082a561d7c1";
+const nonce = "cdaf826d64e0dc5b1075f0c7336263a7";
 
 const signature = await wallet.signMessage(nonce);
 
