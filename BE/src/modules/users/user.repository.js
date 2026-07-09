@@ -5,7 +5,7 @@ const UserRepositpry = {
         return await User.create(userData);
     },
     updateUserName: async (id, userName) => {
-        return await User.findOneAndUpdate({ _id: id }, { userName }, { new: true });
+        return await User.findOneAndUpdate({ _id: id }, { userName }, { returnDocument: 'after' });
     },
     findAllUsers: async () => {
         return await User.find();
@@ -16,11 +16,11 @@ const UserRepositpry = {
     findUserById: async (id) => {
         return await User.findById(id);
     },
-    updateUserRole: async (walletAddress, role) => {
-        return await User.updateOne({ walletAddress }, { role });
+    updateUserRole: async (id, role) => {
+        return await User.findOneAndUpdate({ _id: id }, { role }, { returnDocument: 'after' });
     },
-    updateUserStatus: async (walletAddress, status) => {
-        return await User.updateOne({ walletAddress }, { status });
+    updateUserStatus: async (id, status) => {
+        return await User.findOneAndUpdate({ _id: id }, { status }, { returnDocument: 'after' });
     }
 }
 
