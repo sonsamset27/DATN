@@ -4,7 +4,7 @@ import UserRepository from "../../modules/users/user.repository.js";
 const AuthMiddleware = {
     Authentication: async (req, res, next) => {
         try {
-            const authHeader = req.headers.authorization;
+            const authHeader = req.headers?.authorization;
             if (!authHeader || !authHeader.startsWith("Bearer ")) {
                 return res.status(401).json({
                     message: "Unauthorized"
@@ -15,14 +15,14 @@ const AuthMiddleware = {
             const user = await UserRepository.findUserById(payload.id);
 
             if (!user) {
-                return res.status(401).json({
-                    message: "User not found"
+                return res.status(404).json({
+                    message: "Not found"
                 });
             }
 
             if (user.status !== "ACTIVE") {
                 return res.status(403).json({
-                    message: "User is disabled"
+                    message: "Forbidden"
                 });
             }
             req.user = user;

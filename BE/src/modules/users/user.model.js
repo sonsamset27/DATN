@@ -20,9 +20,11 @@ const UserSchema = new mongoose.Schema({
     },
     userName: {
         type: String,
+        default: ""
     },
     organizationName: {
         type: String,
+        default: ""
     },
     createdAt: {
         type: Date,

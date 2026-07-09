@@ -4,6 +4,12 @@ const UserRepositpry = {
     createUser: async (userData) => {
         return await User.create(userData);
     },
+    updateUserName: async (id, userName) => {
+        return await User.findOneAndUpdate({ _id: id }, { userName }, { new: true });
+    },
+    findAllUsers: async () => {
+        return await User.find();
+    },
     findUserByWalletAddress: async (walletAddress) => {
         return await User.findOne({ walletAddress });
     },
