@@ -13,5 +13,4 @@ UserRoute.patch("/:id/role", AuthMiddleware.Authentication, AuthMiddleware.Autho
 UserRoute.patch("/:id/status", AuthMiddleware.Authentication, AuthMiddleware.Authorization("ADMIN"), UserValidator.updateUserStatus, UserController.updateUserStatus);
 
 
-
 export default UserRoute;
