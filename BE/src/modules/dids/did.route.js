@@ -6,5 +6,6 @@ import AuthLimitMiddleware from "../../shared/middlewares/authLimit.middleware.j
 const DidRoute = Router();
 
 DidRoute.post("/prepare", AuthLimitMiddleware.uploadLimiter, AuthMiddleware.Authentication, DidController.prepareCreateDid);
+DidRoute.post("/register", AuthLimitMiddleware.uploadLimiter, AuthMiddleware.Authentication, DidController.registerDid);
 
 export default DidRoute;

@@ -1,5 +1,5 @@
 import { verifyAccessToken } from "../services/jwt.service.js";
-import UserRepository from "../../modules/users/user.repository.js";
+import UserService from "../../modules/users/user.service.js";
 
 const AuthMiddleware = {
     Authentication: async (req, res, next) => {
@@ -12,7 +12,7 @@ const AuthMiddleware = {
             }
             const token = authHeader.split(" ")[1];
             const payload = verifyAccessToken(token);
-            const user = await UserRepository.findUserById(payload.id);
+            const user = await UserService.findUserById(payload.id);
 
             if (!user) {
                 return res.status(404).json({
