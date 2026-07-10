@@ -1,4 +1,4 @@
-import { isValidWalletAddress, normalizeWalletAddress } from "../utils/wallet.util.js";
+import { isValidWalletAddress, normalizeWalletAddress } from "../../shared/utils/wallet.util.js";
 
 const AuthValidator = {
     generateChallenge: (req, res, next) => {
