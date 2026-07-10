@@ -78,6 +78,14 @@ const BlockchainService = {
             return null;
         }
         return null;
+    },
+    getDID: async (did) => {
+        try {
+            const didDocument = await didRegistry.getDID(did);
+            return didDocument;
+        } catch (error) {
+            throw error;
+        }
     }
 }
 

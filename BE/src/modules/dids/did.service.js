@@ -48,6 +48,46 @@ const DidService = {
         } catch (error) {
             throw error;
         }
+    },
+    getDidByUserId: async (userData) => {
+        try {
+            const user = await UserService.findUserById(userData.id);
+            if (!user) {
+                throw new Error("User not found");
+            }
+            const didDb = await DidRepository.getDidByUserId(user.id);
+            if (!didDb) {
+                throw new Error("Did not found");
+            }
+            const didBlockchain = await BlockchainService.getDID(didDb.did);
+            if (!didBlockchain) {
+                throw new Error("Did not found on blockchain");
+            }
+            if (didBlockchain[1].toLowerCase() !== user.walletAddress.toLowerCase()) {
+                throw new Error("Owner not match");
+            }
+            return didDb;
+        } catch (error) {
+            throw error;
+        }
+    },
+    getDidByAddress: async (address) => {
+        try {
+            const didDb = await DidRepository.getDidByAddress(address);
+            if (!didDb) {
+                throw new Error("Did not found");
+            }
+            const didBlockchain = await BlockchainService.getDID(didDb.did);
+            if (!didBlockchain) {
+                throw new Error("Did not found on blockchain");
+            }
+            if (didBlockchain[1].toLowerCase() !== address.toLowerCase()) {
+                throw new Error("Owner not match");
+            }
+            return didDb;
+        } catch (error) {
+            throw error;
+        }
     }
 }
 

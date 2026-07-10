@@ -6,6 +6,9 @@ const DidRepository = {
     },
     getDidByUserId: async (userId) => {
         return await DidModel.findOne({ ownerId: userId });
+    },
+    getDidByAddress: async (address) => {
+        return await DidModel.findOne({ publicKey: address });
     }
 }
 
