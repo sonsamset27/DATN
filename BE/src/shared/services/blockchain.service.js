@@ -55,6 +55,29 @@ const BlockchainService = {
         } catch (err) {
             throw err;
         }
+    },
+    getContractError: (error) => {
+        try {
+            // 1. Tìm xem lỗi trả về từ blockchain có chứa trường dữ liệu lỗi thô (data) không
+            const errorData = error.data || (error.info && error.info.error && error.info.error.data);
+
+            if (errorData) {
+                // 2. Sử dụng interface của contract để giải mã chuỗi hex (ví dụ: 0x4b200d3f)
+                const parsedError = didRegistry.interface.parseError(errorData);
+
+                if (parsedError) {
+                    // Trả về tên lỗi (ví dụ: "WalletAlreadyHasDID") và các tham số truyền vào lỗi nếu có
+                    return {
+                        errorName: parsedError.name,
+                        args: parsedError.args
+                    };
+                }
+            }
+        } catch (parseErr) {
+            // Phòng trường hợp không giải mã được (ví dụ lỗi lạ từ node RPC)
+            return null;
+        }
+        return null;
     }
 }
 
