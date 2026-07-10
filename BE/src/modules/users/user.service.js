@@ -55,6 +55,25 @@ const UserService = {
         } catch (error) {
             throw error;
         }
+    },
+    findByWalletAddress: async (walletAddress) => {
+        try {
+            const user = await UserRepository.findUserByWalletAddress(walletAddress);
+            if (!user) {
+                throw new Error("User not found");
+            }
+            return user;
+        } catch (error) {
+            throw error;
+        }
+    },
+    createUser: async (walletAddress) => {
+        try {
+            const user = await UserRepository.createUser({ walletAddress });
+            return user;
+        } catch (error) {
+            throw error;
+        }
     }
 }
 

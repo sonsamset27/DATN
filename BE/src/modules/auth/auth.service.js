@@ -2,8 +2,8 @@ import generateNonce from "../../shared/utils/generateNonce.js";
 import ChallengeRepository from "./challenge.repository.js";
 import { verifyMessage } from "ethers";
 import { compareWalletAddress } from "../../shared/utils/wallet.util.js";
-import UserRepository from "../users/user.repository.js";
 import { generateAccessToken } from "../../shared/services/jwt.service.js";
+import UserService from "../users/user.service.js";
 
 const AuthService = {
     generateChallenge: async (walletAddress) => {
@@ -14,7 +14,7 @@ const AuthService = {
             const message = {
                 action: "SIGN_IN",
                 wallet: walletAddress,
-                message: "Welcome to DVP Digital Credential Network! To authenticate and secure your account, please sign this message.",
+                message: "Welcome to Digital Credential Network! To authenticate and secure your account, please sign this message.",
                 nonce: nonce,
                 expiriedAt: newChallenge.expiresAt
             };
@@ -36,11 +36,9 @@ const AuthService = {
             if (!compareWalletAddress(signer, walletAddress)) {
                 throw new Error("Wallet address does not match");
             }
-            const user = await UserRepository.findUserByWalletAddress(walletAddress);
+            const user = await UserService.findByWalletAddress(walletAddress);
             if (!user) {
-                user = await UserRepository.createUser({
-                    walletAddress
-                });
+                user = await UserService.createUser(walletAddress);
             }
             const token = generateAccessToken({
                 id: user._id,

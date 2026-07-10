@@ -5,6 +5,7 @@ import { swaggerUi, swaggerSpec } from "./configs/swagger.js";
 import helmet from "helmet"
 import compression from "compression";
 import morgan from "morgan";
+import DidRouter from "./modules/dids/did.route.js";
 
 const app = express()
 
@@ -27,6 +28,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 // routes
 app.use("/api/auth", AuthRouter);
 app.use("/api/users", UserRouter);
+app.use("/api/dids", DidRouter);
 
 app.get("/", (req, res) => {
     res.status(200).json({
