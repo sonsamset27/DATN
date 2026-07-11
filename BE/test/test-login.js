@@ -13,7 +13,7 @@ const wallet = new Wallet(
     "0x02cda644445ec8fb74eea22e34b98423145c1a499b75fc5d86bae81969a00e47"
 );
 
-const nonce = "3c02012ebd8ce5d0b9a42d5605bce29d";
+const nonce = "993d1f145c531ea5ab0696f3048bd6a9";
 
 const signature = await wallet.signMessage(nonce);
 

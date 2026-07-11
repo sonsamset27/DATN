@@ -2,28 +2,13 @@ import Challenge from "./challenge.model.js";
 
 const ChallengeRepository = {
     createChallenge: async (walletAddress, nonce) => {
-        try {
-            const challenge = new Challenge({ walletAddress, nonce })
-            await challenge.save()
-            return challenge
-        } catch (error) {
-            throw error;
-        }
+        return await Challenge.create({ walletAddress, nonce });
     },
     findChallengeByWallet: async (walletAddress) => {
-        try {
-            const challenge = await Challenge.findOne({ walletAddress })
-            return challenge
-        } catch (error) {
-            throw error;
-        }
+        return await Challenge.findOne({ walletAddress });
     },
     deleteChallengeByWallet: async (walletAddress) => {
-        try {
-            await Challenge.deleteOne({ walletAddress })
-        } catch (error) {
-            throw error;
-        }
+        return await Challenge.deleteOne({ walletAddress });
     }
 }
 
