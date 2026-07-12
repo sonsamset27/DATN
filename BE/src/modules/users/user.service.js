@@ -74,6 +74,20 @@ const UserService = {
         } catch (error) {
             throw error;
         }
+    },
+    promoteToIssuer: async (id, organizationName, organizationCode) => {
+        try {
+            const user = await UserRepository.findUserById(id);
+            if (!user) {
+                throw new Error("User not found");
+            }
+            if (user.role === "ISSUER") {
+                throw new Error("User is already an issuer");
+            }
+            return await UserRepository.promoteToIssuer(id, organizationName, organizationCode);
+        } catch (error) {
+            throw error;
+        }
     }
 }
 

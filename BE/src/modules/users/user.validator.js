@@ -35,6 +35,20 @@ const UserValidator = {
             });
         }
         next();
+    },
+    promoteToIssuer: (req, res, next) => {
+        const { organizationName, organizationCode } = req.body;
+        if (!organizationName) {
+            return res.status(400).json({
+                message: "Organization name is required"
+            });
+        }
+        if (!organizationCode) {
+            return res.status(400).json({
+                message: "Organization code is required"
+            });
+        }
+        next();
     }
 }
 

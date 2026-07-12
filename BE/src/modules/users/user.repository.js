@@ -21,6 +21,9 @@ const UserRepositpry = {
     },
     updateUserStatus: async (id, status) => {
         return await User.findOneAndUpdate({ _id: id }, { status }, { returnDocument: 'after' });
+    },
+    promoteToIssuer: async (id, organizationName, organizationCode) => {
+        return await User.findOneAndUpdate({ _id: id }, { role: "ISSUER", organizationName, organizationCode }, { returnDocument: 'after' });
     }
 }
 

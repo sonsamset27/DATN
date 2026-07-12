@@ -56,6 +56,23 @@ const BlockchainService = {
             throw err;
         }
     },
+    getDataFromCredentialEvent: async (txReceipt, eventName) => {
+        try {
+            for (const log of txReceipt.logs) {
+                try {
+                    const parsedLog = credentialRegistry.interface.parseLog(log);
+                    if (parsedLog && parsedLog.name === eventName) {
+                        return parsedLog.args;
+                    }
+                } catch (e) {
+                    continue;
+                }
+            }
+            throw new Error(`Không tìm thấy sự kiện '${eventName}' trong giao dịch này.`);
+        } catch (err) {
+            throw err;
+        }
+    },
     getContractError: (error) => {
         try {
             // 1. Tìm xem lỗi trả về từ blockchain có chứa trường dữ liệu lỗi thô (data) không
@@ -83,6 +100,21 @@ const BlockchainService = {
         try {
             const didDocument = await didRegistry.getDID(did);
             return didDocument;
+        } catch (error) {
+            throw error;
+        }
+    },
+    issueCredential: async (data) => {
+        try {
+            const tx = await credentialRegistry.issueCredential(
+                data.credentialId,
+                data.credentialHash,
+                data.issuerDid,
+                data.holderDid,
+                data.expiresAt,
+                data.signatureAlgorithm
+            );
+            return tx;
         } catch (error) {
             throw error;
         }

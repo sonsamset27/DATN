@@ -104,6 +104,24 @@ const UserController = {
                 error: error.message
             });
         }
+    },
+    promoteToIssuer: async (req, res) => {
+        try {
+            const { organizationName, organizationCode } = req.body;
+            const id = req.params.id;
+            const result = await UserService.promoteToIssuer(id, organizationName, organizationCode);
+            res.status(200).json({
+                status: 200,
+                message: "User promoted to issuer successfully",
+                data: result
+            });
+        } catch (error) {
+            res.status(500).json({
+                status: 500,
+                message: "Error promoting user to issuer",
+                error: error.message
+            });
+        }
     }
 }
 
