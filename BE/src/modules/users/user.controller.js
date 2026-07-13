@@ -122,6 +122,23 @@ const UserController = {
                 error: error.message
             });
         }
+    },
+    demoteOrRevokeIssuer: async (req, res) => {
+        try {
+            const id = req.params.id;
+            const result = await UserService.demoteOrRevokeIssuer(id);
+            res.status(200).json({
+                status: 200,
+                message: "User demoted to holder successfully",
+                data: result
+            });
+        } catch (error) {
+            res.status(500).json({
+                status: 500,
+                message: "Error demoting user to holder",
+                error: error.message
+            });
+        }
     }
 }
 

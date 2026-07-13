@@ -75,7 +75,7 @@ const DidService = {
         try {
             const didDb = await DidRepository.getDidByAddress(address);
             if (!didDb) {
-                throw new Error("Did not found");
+                throw new Error("Did not found Did");
             }
             const didBlockchain = await BlockchainService.getDID(didDb.did);
             if (!didBlockchain) {

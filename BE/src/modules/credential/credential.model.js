@@ -6,13 +6,11 @@ const CredentialSchema = new mongoose.Schema({
         required: true
     },
     issuerDid: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Did",
+        type: String,
         required: true
     },
     holderDid: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Did",
+        type: String,
         required: true
     },
     credentialTemplateId: {

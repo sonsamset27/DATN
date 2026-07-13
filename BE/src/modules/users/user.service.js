@@ -1,4 +1,5 @@
 import UserRepository from "./user.repository.js";
+import BlockchainService from "../../shared/services/blockchain.service.js";
 
 const UserService = {
     findUserById: async (id) => {
@@ -84,7 +85,25 @@ const UserService = {
             if (user.role === "ISSUER") {
                 throw new Error("User is already an issuer");
             }
+            const tx = await BlockchainService.setRelayerStatus(user.walletAddress, true);
+            await tx.wait();
             return await UserRepository.promoteToIssuer(id, organizationName, organizationCode);
+        } catch (error) {
+            throw error;
+        }
+    },
+    demoteOrRevokeIssuer: async (id) => {
+        try {
+            const user = await UserRepository.findUserById(id);
+            if (!user) {
+                throw new Error("User not found");
+            }
+            if (user.walletAddress) {
+                const tx = await BlockchainService.setRelayerStatus(user.walletAddress, false);
+                await tx.wait();
+            }
+            const updatedUser = await UserRepository.updateUserStatus(id, "DISABLE");
+            return updatedUser;
         } catch (error) {
             throw error;
         }

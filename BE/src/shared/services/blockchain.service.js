@@ -118,6 +118,19 @@ const BlockchainService = {
         } catch (error) {
             throw error;
         }
+    },
+    setRelayerStatus: async (targetWalletAddress, isAuthorized) => {
+        try {
+            // credentialRegistryContract phải được khởi tạo bằng ví Admin (ví deploy contract)
+            const tx = await credentialRegistry.setRelayerStatus(
+                targetWalletAddress,
+                isAuthorized
+            );
+            return tx;
+        } catch (error) {
+            console.error("Lỗi gọi hàm setRelayerStatus lên Smart Contract:", error);
+            throw error;
+        }
     }
 }
 

@@ -36,7 +36,13 @@ const AuthService = {
             if (!compareWalletAddress(signer, walletAddress)) {
                 throw new Error("Wallet address does not match");
             }
-            const user = await UserService.findByWalletAddress(walletAddress);
+            let user;
+
+            try {
+                user = await UserService.findByWalletAddress(walletAddress);
+            } catch (err) {
+                user = null;
+            }
             if (!user) {
                 user = await UserService.createUser(walletAddress);
             }

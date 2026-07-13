@@ -5,14 +5,17 @@ import DidService from "../dids/did.service.js";
 import BlockchainService from "../../shared/services/blockchain.service.js";
 import CredentialTemplateService from "../credentialTemplates/credentialTemplate.service.js";
 import CredentialValidator from "./credential.validator.js";
+import crypto from "crypto";
+
 const CredentialService = {
     issueCredential: async (data, user) => {
         try {
-            await CredentialValidator.issueCredential(data);
             const templateFields = (await CredentialTemplateService.getCredentialTemplateById(data.credentialTemplateId)).fields;
-            await CredentialValidator.validateCredential(data.credentialSubject, templateFields);
-            const issuerDid = await DidService.getDidByUserId(user._id);
+            await CredentialValidator.validateCredentialSubject(templateFields, data.credentialSubject);
+            const issuerDid = await DidService.getDidByAddress(user.walletAddress);
+            console.log(issuerDid)
             const holderDid = await DidService.getDidByAddress(data.holderAddress);
+            console.log(holderDid)
             const dataIpfs = {
                 credentialId: GenerateIdUltil.generateCredentialId(user.organizationCode),
                 issuerDid: issuerDid.did,
@@ -23,9 +26,9 @@ const CredentialService = {
                 expiresAt: data.expirateAt,
                 signatureAlgorithm: "ECC"
             }
-
             const cid = await IpfsService.pinJsonToIpfs(dataIpfs);
-            const credentialHash = "0x" + SHA256(JSON.stringify(dataIpfs)).toString();
+            const jsonString = JSON.stringify(dataIpfs);
+            const credentialHash = "0x" + crypto.createHash("sha256").update(jsonString).digest("hex");
             const expiresAt = dataIpfs.expiresAt
                 ? Math.floor(new Date(dataIpfs.expiresAt).getTime() / 1000)
                 : 0;
@@ -43,7 +46,7 @@ const CredentialService = {
             const receipt = await tx.wait();
             const txHash = tx.hash;
 
-            const credential = await CredentialRepository.createCredential({
+            const credential = await CredentialRepository.issueCredential({
                 credentialId: dataIpfs.credentialId,
                 issuerDid: dataIpfs.issuerDid,
                 holderDid: dataIpfs.holderDid,

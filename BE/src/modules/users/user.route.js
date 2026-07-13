@@ -13,5 +13,6 @@ UserRoute.get("/:id", AuthLimitMiddleware.readLimiter, AuthMiddleware.Authentica
 UserRoute.patch("/:id/role", AuthLimitMiddleware.uploadLimiter, AuthMiddleware.Authentication, AuthMiddleware.Authorization("ADMIN"), UserValidator.updateUserRole, UserController.updateUserRole);
 UserRoute.patch("/:id/status", AuthLimitMiddleware.uploadLimiter, AuthMiddleware.Authentication, AuthMiddleware.Authorization("ADMIN"), UserValidator.updateUserStatus, UserController.updateUserStatus);
 UserRoute.patch("/:id/promote-issuer", AuthLimitMiddleware.uploadLimiter, AuthMiddleware.Authentication, AuthMiddleware.Authorization("ADMIN"), UserValidator.promoteToIssuer, UserController.promoteToIssuer);
+UserRoute.patch("/:id/demote-issuer", AuthLimitMiddleware.uploadLimiter, AuthMiddleware.Authentication, AuthMiddleware.Authorization("ADMIN"), UserController.demoteOrRevokeIssuer);
 
 export default UserRoute;

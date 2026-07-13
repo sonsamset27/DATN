@@ -1,22 +1,33 @@
+import { isValidWalletAddress, normalizeWalletAddress } from "../../shared/utils/wallet.util.js";
 const CredentialValidator = {
-    issueCredentialValidator(data) {
+    issueCredential(req, res, next) {
+        const data = req.body;
         if (!data) {
-            throw new Error("Request body is required");
+            return res.status(400).json({ message: "Request body is required" });
         }
-        if (!data.holderAddress || typeof data.holderAddress !== "string") {
-            throw new Error("Holder address is required");
+        const { holderAddress, credentialTemplateId, credentialSubject, expiresAt } = data;
+        if (!holderAddress) {
+            return res.status(400).json({ message: "Holder address is required" });
         }
-        if (!data.credentialTemplateId || typeof data.credentialTemplateId !== "string") {
-            throw new Error("Credential template id is required");
+        if (!isValidWalletAddress(holderAddress)) {
+            return res.status(400).json({ message: "Invalid holder address" });
         }
-        if (!data.credentialSubject || typeof data.credentialSubject !== "object" || Array.isArray(data.credentialSubject)) {
-            throw new Error("Credential subject is required");
+        if (!credentialTemplateId || typeof credentialTemplateId !== "string") {
+            return res.status(400).json({ message: "Credential template id is required" });
         }
-        if (data.expiresAt && Number.isNaN(Date.parse(data.expiresAt))) {
-            throw new Error("Invalid expiresAt");
+        if (!credentialSubject || typeof credentialSubject !== "object" || Array.isArray(credentialSubject)) {
+            return res.status(400).json({ message: "Credential subject is required" });
         }
-
-        return true;
+        if (expiresAt) {
+            if (Number.isNaN(Date.parse(expiresAt))) {
+                return res.status(400).json({ message: "Invalid expiresAt" });
+            }
+            if (Date.parse(expiresAt) < Date.now()) {
+                return res.status(400).json({ message: "ExpiresAt must be in the future" });
+            }
+        }
+        req.body.holderAddress = normalizeWalletAddress(holderAddress);
+        next();
     },
     validateCredentialSubject(fields, credentialSubject) {
 

@@ -12,6 +12,6 @@ export default {
     JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN,
     PINATA_API_KEY: process.env.PINATA_API_KEY,
     PINATA_API_SECRET: process.env.PINATA_API_SECRET,
-    PINATA_API_URL: process.env.PINATA_API_URL,
-    PINATA_API_GATEWAY_URL: process.env.PINATA_API_GATEWAY_URL,
+    PINATA_JWT: process.env.PINATA_JWT,
+    PINATA_GATEWAY_URL: process.env.PINATA_GATEWAY_URL,
 }

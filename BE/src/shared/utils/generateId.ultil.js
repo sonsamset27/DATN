@@ -1,8 +1,11 @@
-import { randomBytes } from "ethers";
-
+import crypto from "crypto";
 const GenerateIdUltil = {
     generateCredentialId: (organizationCode) => {
-        return `VC-${organizationCode}-${Date.getFullYear()}-${randomBytes(5).toString('hex')}`;
+        const year = new Date().getFullYear();
+        const timestampHex = Date.now().toString(16).slice(-6);
+        const randomHex = crypto.randomBytes(2).toString('hex');
+
+        return `VC-${organizationCode}-${year}-${timestampHex}${randomHex}`;
     }
 }
 

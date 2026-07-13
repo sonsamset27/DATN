@@ -11,8 +11,16 @@ contract CredentialRegistry {
     error HolderDIDNotFound();
     error NotIssuerOwner();
     error InvalidInput();
+    // Khi ví gọi hàm không có quyền Admin hoặc không được ủy quyền
+    error NotAuthorizedSender(); 
 
     IDIDRegistry public didRegistry;
+    
+    // Địa chỉ Admin (người deploy contract) để quản lý danh sách ví Backend
+    address public admin; 
+    
+    // Mapping lưu danh sách các ví Backend được phép chạy hộ người dùng
+    mapping(address => bool) public authorizedRelayers;
 
     enum Status {
         ACTIVE,
@@ -32,21 +40,31 @@ contract CredentialRegistry {
         bool exists;
     }
 
-    mapping(string => CredentialRecord)
-        private credentials;
+    mapping(string => CredentialRecord) private credentials;
 
-    event CredentialIssued(
-        string credentialId,
-        string issuerDid,
-        string holderDid
-    );
+    event CredentialIssued(string credentialId, string issuerDid, string holderDid);
+    event CredentialRevoked(string credentialId);
+    //  Ghi vết khi thêm/xóa ví Backend
+    event RelayerStatusChanged(address relayer, bool isAuthorized); 
 
-    event CredentialRevoked(
-        string credentialId
-    );
+    // Chỉ cho phép Admin gọi
+    modifier onlyAdmin() {
+        if (msg.sender != admin) {
+            revert NotAuthorizedSender();
+        }
+        _;
+    }
 
     constructor(address didRegistryAddress) {
         didRegistry = IDIDRegistry(didRegistryAddress);
+        admin = msg.sender; // Người deploy mặc định là Admin
+        authorizedRelayers[msg.sender] = true; // Mặc định Admin cũng là một người gửi hợp lệ
+    }
+
+    //  Thêm hoặc hủy quyền của ví Backend (Chỉ Admin được gọi)
+    function setRelayerStatus(address _relayer, bool _isAuthorized) external onlyAdmin {
+        authorizedRelayers[_relayer] = _isAuthorized;
+        emit RelayerStatusChanged(_relayer, _isAuthorized);
     }
 
     function issueCredential(
@@ -78,7 +96,12 @@ contract CredentialRegistry {
         if (!didRegistry.didExists(holderDid)) {
             revert HolderDIDNotFound();
         }
-        if (didRegistry.getOwner(issuerDid) != msg.sender) {
+
+        // Giao dịch hợp lệ NẾU: Ví gửi (msg.sender) là chủ sở hữu DID HOẶC Ví gửi nằm trong danh sách Backend được ủy quyền
+        bool isOwner = (didRegistry.getOwner(issuerDid) == msg.sender);
+        bool isAuthorizedBackend = authorizedRelayers[msg.sender];
+        
+        if (!isOwner && !isAuthorizedBackend) {
             revert NotIssuerOwner();
         }
 
@@ -94,11 +117,7 @@ contract CredentialRegistry {
             signatureAlgorithm: signatureAlgorithm,
             exists: true
         });
-        emit CredentialIssued(
-            credentialId,
-            issuerDid,
-            holderDid
-        );
+        emit CredentialIssued(credentialId, issuerDid, holderDid);
     }
 
     function revokeCredential(string calldata credentialId) external {
@@ -113,7 +132,11 @@ contract CredentialRegistry {
         if (credential.status == Status.REVOKED) {
             revert CredentialAlreadyRevoked();
         }
-        if (didRegistry.getOwner(credential.issuerDid) != msg.sender) {
+
+        // Cho phép ví Backend có quyền thu hồi hộ chứng chỉ
+        bool isOwner = (didRegistry.getOwner(credential.issuerDid) == msg.sender);
+        bool isAuthorizedBackend = authorizedRelayers[msg.sender];
+        if (!isOwner && !isAuthorizedBackend) {
             revert NotIssuerOwner();
         }
 
@@ -123,26 +146,14 @@ contract CredentialRegistry {
         emit CredentialRevoked(credentialId);
     }
 
-    function getCredential(string calldata credentialId) external view returns (
-            string memory,
-            bytes32,
-            string memory,
-            string memory,
-            uint256,
-            uint256,
-            uint256,
-            Status,
-            string memory,
-            bool
-        ){
-        if (bytes(credentialId).length == 0) {
-            revert InvalidInput();
+    function getCredential(string calldata credentialId) external view returns (string memory, bytes32, string memory, string memory, uint256, uint256, uint256, Status, string memory, bool) {
+        if (bytes(credentialId).length == 0) { 
+            revert InvalidInput(); 
         }
-        if (!credentials[credentialId].exists) {
-            revert CredentialNotFound();
+        if (!credentials[credentialId].exists) { 
+            revert CredentialNotFound(); 
         }
         CredentialRecord memory credential = credentials[credentialId];
-
         return (
             credential.credentialId,
             credential.credentialHash,
@@ -156,20 +167,19 @@ contract CredentialRegistry {
             credential.exists
         );
     }
-
-    function credentialExists(string calldata credentialId) external view returns (bool) {
-        if (bytes(credentialId).length == 0) {
-            revert InvalidInput();
+    function credentialExists(string calldata credentialId) external view returns (bool) { 
+        if (bytes(credentialId).length == 0) { 
+            revert InvalidInput(); 
         }
-        return credentials[credentialId].exists;
+        return credentials[credentialId].exists; 
     }
-    function getCredentialHash(string calldata credentialId) external view returns (bytes32) {
-        if (bytes(credentialId).length == 0) {
-            revert InvalidInput();
-        }
-        if (!credentials[credentialId].exists) {
-            revert CredentialNotFound();
+    function getCredentialHash(string calldata credentialId) external view returns (bytes32) { 
+        if (bytes(credentialId).length == 0) { 
+            revert InvalidInput(); 
+        } 
+        if (!credentials[credentialId].exists) { 
+            revert CredentialNotFound(); 
+        } 
+        return credentials[credentialId].credentialHash; 
     }
-    return credentials[credentialId].credentialHash;
-}
 }
