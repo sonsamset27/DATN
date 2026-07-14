@@ -9,6 +9,14 @@ const PinataService = {
         } catch (error) {
             throw error;
         }
+    },
+    readJsonFromIpfs: async (cid) => {
+        try {
+            const result = await pinata.download.public.json(cid);
+            return result;
+        } catch (error) {
+            throw error;
+        }
     }
 }
 

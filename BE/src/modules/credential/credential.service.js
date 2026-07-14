@@ -61,6 +61,56 @@ const CredentialService = {
         } catch (error) {
             throw error;
         }
+    },
+    verifyCredential: async (credentialId) => {
+        try {
+            const credential = await CredentialRepository.getCredentialByCredentialId(credentialId);
+            if (!credential) {
+                throw new Error("Credential not found in database");
+            }
+            const dataIpfs = await IpfsService.readJsonFromIpfs(credential.cid);
+            const jsonString = JSON.stringify(dataIpfs);
+            const credentialHash = "0x" + crypto.createHash("sha256").update(jsonString).digest("hex");
+            const credentialHashBlockchain = await BlockchainService.getCredentialHash(credentialId);
+
+            if (credentialHash !== credentialHashBlockchain) {
+                throw new Error("Credential hash does not match");
+            }
+            return {
+                status: "VERIFIED",
+                metadata: {
+                    credentialId: dataIpfs.credentialId,
+                    issuerDid: dataIpfs.issuerDid,
+                    holderDid: dataIpfs.holderDid,
+                    credentialTemplateId: dataIpfs.credentialTemplateId,
+                    issuedAt: dataIpfs.issuedAt,
+                    expiresAt: dataIpfs.expiresAt || "Never",
+                    status: credential.status
+                },
+                subjectData: dataIpfs.credentialSubject,
+                blockchainProof: {
+                    credentialHash: credentialHash,
+                    txHash: credential.txHash
+                }
+            };
+        } catch (error) {
+            throw error;
+        }
+    },
+    getOwnCredentials: async (user) => {
+        try {
+            const holderDid = await DidService.getDidByAddress(user.walletAddress);
+            if (!holderDid) {
+                throw new Error("Holder DID not found");
+            }
+            const credentials = await CredentialRepository.getCredentialsByHolderAddress(holderDid.did);
+            if (credentials.length === 0) {
+                throw new Error("No credentials found");
+            }
+            return credentials;
+        } catch (error) {
+            throw error;
+        }
     }
 }
 

@@ -85,6 +85,20 @@ const CredentialValidator = {
             }
         }
         return true;
+    },
+    verifyCredential(req, res, next) {
+        const data = req.body;
+        if (!data) {
+            return res.status(400).json({ message: "Request body is required" });
+        }
+        const { credentialId } = data;
+        if (!credentialId) {
+            return res.status(400).json({ message: "Credential id is required" });
+        }
+        if (typeof credentialId !== "string") {
+            return res.status(400).json({ message: "Credential id must be string" });
+        }
+        next();
     }
 };
 

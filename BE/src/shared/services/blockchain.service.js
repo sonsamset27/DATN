@@ -131,6 +131,14 @@ const BlockchainService = {
             console.error("Lỗi gọi hàm setRelayerStatus lên Smart Contract:", error);
             throw error;
         }
+    },
+    getCredentialHash: async (credentialId) => {
+        try {
+            const credentialHash = await credentialRegistry.getCredentialHash(credentialId);
+            return credentialHash;
+        } catch (error) {
+            throw error;
+        }
     }
 }
 
