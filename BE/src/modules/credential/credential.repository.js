@@ -6,8 +6,14 @@ const CredentialRepository = {
     getCredentialByCredentialId: async (credentialId) => {
         return await Credential.findOne({ credentialId: credentialId });
     },
-    getCredentialsByHolderAddress: async (holderAddress) => {
-        return await Credential.find({ holderAddress: holderAddress });
+    getCredentialsByHolderDid: async (holderDid) => {
+        return await Credential.find({ holderDid: holderDid });
+    },
+    getCredentialsByIssuerDid: async (issuerDid) => {
+        return await Credential.find({ issuerDid: issuerDid });
+    },
+    updateCredentialStatus: async (credentialId, status) => {
+        return await Credential.findOneAndUpdate({ credentialId: credentialId }, { status: status }, { returnDocument: "after" });
     }
 }
 

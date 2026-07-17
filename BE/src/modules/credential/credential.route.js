@@ -9,4 +9,7 @@ const CredentialRoute = Router();
 CredentialRoute.post("/issue", AuthMiddleware.Authentication, AuthMiddleware.Authorization("ADMIN", "ISSUER"), CredentialValidator.issueCredential, CredentialController.issueCredential);
 CredentialRoute.post("/verify", AuthMiddleware.Authentication, AuthMiddleware.Authorization("ADMIN", "ISSUER", "HOLDER"), CredentialValidator.verifyCredential, CredentialController.verifyCredential);
 CredentialRoute.get("/owner", AuthMiddleware.Authentication, AuthMiddleware.Authorization("ADMIN", "ISSUER", "HOLDER"), CredentialController.getOwnCredentials);
+CredentialRoute.get("/issued", AuthMiddleware.Authentication, AuthMiddleware.Authorization("ADMIN", "ISSUER"), CredentialController.getCredentialIssueByIssuer);
+CredentialRoute.post("/reissue-all", AuthMiddleware.Authentication, AuthMiddleware.Authorization("ISSUER"), CredentialValidator.reissueAllCredentials, CredentialController.reissueAllCredentials);
+CredentialRoute.get("/:credentialId", AuthMiddleware.Authentication, AuthMiddleware.Authorization("ADMIN", "ISSUER", "HOLDER"), CredentialController.getCredentialById);
 export default CredentialRoute;

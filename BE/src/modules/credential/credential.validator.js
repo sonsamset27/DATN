@@ -99,6 +99,18 @@ const CredentialValidator = {
             return res.status(400).json({ message: "Credential id must be string" });
         }
         next();
+    },
+    reissueAllCredentials(req, res, next) {
+        const { oldWalletAddress, newWalletAddress } = req.body;
+        if (!oldWalletAddress || !newWalletAddress) {
+            return res.status(400).json({ message: "Request body is required" });
+        }
+        if (!isValidWalletAddress(oldWalletAddress) || !isValidWalletAddress(newWalletAddress)) {
+            return res.status(400).json({ message: "Invalid wallet address" });
+        }
+        req.body.oldWalletAddress = normalizeWalletAddress(oldWalletAddress);
+        req.body.newWalletAddress = normalizeWalletAddress(newWalletAddress);
+        next();
     }
 };
 

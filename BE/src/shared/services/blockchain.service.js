@@ -139,6 +139,14 @@ const BlockchainService = {
         } catch (error) {
             throw error;
         }
+    },
+    revokeCredential: async (credentialId) => {
+        try {
+            const tx = await credentialRegistry.revokeCredential(credentialId);
+            return tx;
+        } catch (error) {
+            throw error;
+        }
     }
 }
 
