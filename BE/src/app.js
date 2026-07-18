@@ -8,6 +8,7 @@ import morgan from "morgan";
 import DidRouter from "./modules/dids/did.route.js";
 import CredentialTemplateRouter from "./modules/credentialTemplates/credentialTemplate.route.js";
 import CredentialRouter from "./modules/credential/credential.route.js";
+import AuditLogRouter from "./modules/auditLog/auditLog.route.js";
 
 const app = express()
 
@@ -31,6 +32,7 @@ app.use("/api/v1/users", UserRouter);
 app.use("/api/v1/dids", DidRouter);
 app.use("/api/v1/credential-templates", CredentialTemplateRouter);
 app.use("/api/v1/credentials", CredentialRouter);
+app.use("/api/v1/audit-logs", AuditLogRouter);
 
 app.get("/", (req, res) => {
     res.status(200).json({

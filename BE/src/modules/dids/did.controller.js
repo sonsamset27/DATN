@@ -1,72 +1,93 @@
 import DidService from "./did.service.js";
+import AppError from "../../shared/errors/AppError.js";
+import HttpStatus from "../../shared/errors/httpStatus.js";
 
 const DidController = {
     prepareCreateDid: async (req, res) => {
         try {
             const message = await DidService.prepareCreateDid(req.user);
-            res.status(200).json({
-                status: 200,
+            return res.status(HttpStatus.OK).json({
                 message: "Create DID message prepared successfully",
-                data: message
+                data: message,
             });
         } catch (error) {
-            res.status(500).json({
-                status: 500,
+            if (error instanceof AppError) {
+                return res.status(error.statusCode).json({
+                    errorCode: error.errorCode,
+                    message: error.message,
+                });
+            }
+            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+                errorCode: "SYS_001",
                 message: "Error preparing create DID message",
-                error: error.message
             });
         }
     },
+
     registerDid: async (req, res) => {
         try {
             const { txHash } = req.body;
-            const message = await DidService.registerDid(req.user, txHash);
-            res.status(201).json({
-                status: 201,
+            const result = await DidService.registerDid(req.user, txHash);
+            return res.status(HttpStatus.CREATED).json({
                 message: "DID registered successfully",
-                data: message
+                data: result,
             });
         } catch (error) {
-            res.status(500).json({
-                status: 500,
-                message: "Error register DID",
-                error: error.message
+            if (error instanceof AppError) {
+                return res.status(error.statusCode).json({
+                    errorCode: error.errorCode,
+                    message: error.message,
+                });
+            }
+            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+                errorCode: "SYS_001",
+                message: "Error registering DID",
             });
         }
     },
+
     getDidByUserId: async (req, res) => {
         try {
-            const message = await DidService.getDidByUserId(req.user);
-            res.status(200).json({
-                status: 200,
-                message: "Get DID successfully",
-                data: message
+            const result = await DidService.getDidByUserId(req.user);
+            return res.status(HttpStatus.OK).json({
+                message: "DID fetched successfully",
+                data: result,
             });
         } catch (error) {
-            res.status(500).json({
-                status: 500,
-                message: "Error get DID",
-                error: error.message
+            if (error instanceof AppError) {
+                return res.status(error.statusCode).json({
+                    errorCode: error.errorCode,
+                    message: error.message,
+                });
+            }
+            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+                errorCode: "SYS_001",
+                message: "Error fetching DID",
             });
         }
     },
+
     getDidByAddress: async (req, res) => {
         try {
             const address = req.body.walletAddress;
-            const message = await DidService.getDidByAddress(address);
-            res.status(200).json({
-                status: 200,
-                message: "Get DID successfully",
-                data: message
+            const result = await DidService.getDidByAddress(address);
+            return res.status(HttpStatus.OK).json({
+                message: "DID fetched successfully",
+                data: result,
             });
         } catch (error) {
-            res.status(500).json({
-                status: 500,
-                message: "Error get DID",
-                error: error.message
+            if (error instanceof AppError) {
+                return res.status(error.statusCode).json({
+                    errorCode: error.errorCode,
+                    message: error.message,
+                });
+            }
+            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+                errorCode: "SYS_001",
+                message: "Error fetching DID by address",
             });
         }
-    }
-}
+    },
+};
 
 export default DidController;

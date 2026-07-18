@@ -1,90 +1,132 @@
 import CredentialTemplateService from "./credentialTemplate.service.js";
+import AppError from "../../shared/errors/AppError.js";
+import HttpStatus from "../../shared/errors/httpStatus.js";
 
 const CredentialTemplateController = {
     createCredentialTemplate: async (req, res) => {
         try {
             const newTemplate = await CredentialTemplateService.createCredentialTemplate(req.body, req.user);
-            return res.status(201).json({
+            return res.status(HttpStatus.CREATED).json({
                 message: "Template created successfully",
-                data: newTemplate
+                data: newTemplate,
             });
         } catch (error) {
-            return res.status(500).json({
+            if (error instanceof AppError) {
+                return res.status(error.statusCode).json({
+                    errorCode: error.errorCode,
+                    message: error.message,
+                });
+            }
+            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+                errorCode: "SYS_001",
                 message: "Failed to create credential template",
-                error: error.message
             });
         }
     },
+
     getAllCredentialTemplates: async (req, res) => {
         try {
             const templates = await CredentialTemplateService.getAllCredentialTemplates();
-            return res.status(200).json({
+            return res.status(HttpStatus.OK).json({
                 message: "Credential templates fetched successfully",
-                data: templates
+                data: templates,
             });
         } catch (error) {
-            return res.status(500).json({
+            if (error instanceof AppError) {
+                return res.status(error.statusCode).json({
+                    errorCode: error.errorCode,
+                    message: error.message,
+                });
+            }
+            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+                errorCode: "SYS_001",
                 message: "Failed to fetch credential templates",
-                error: error.message
             });
         }
     },
+
     getCredentialTemplateById: async (req, res) => {
         try {
             const template = await CredentialTemplateService.getCredentialTemplateById(req.params.id);
-            return res.status(200).json({
+            return res.status(HttpStatus.OK).json({
                 message: "Credential template fetched successfully",
-                data: template
+                data: template,
             });
         } catch (error) {
-            return res.status(500).json({
+            if (error instanceof AppError) {
+                return res.status(error.statusCode).json({
+                    errorCode: error.errorCode,
+                    message: error.message,
+                });
+            }
+            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+                errorCode: "SYS_001",
                 message: "Failed to fetch credential template",
-                error: error.message
             });
         }
     },
+
     getCredentialTemplateByIssuerId: async (req, res) => {
         try {
             const templates = await CredentialTemplateService.getCredentialTemplateByIssuerId(req.params.issuerId);
-            return res.status(200).json({
+            return res.status(HttpStatus.OK).json({
                 message: "Credential templates fetched successfully",
-                data: templates
+                data: templates,
             });
         } catch (error) {
-            return res.status(500).json({
+            if (error instanceof AppError) {
+                return res.status(error.statusCode).json({
+                    errorCode: error.errorCode,
+                    message: error.message,
+                });
+            }
+            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+                errorCode: "SYS_001",
                 message: "Failed to fetch credential templates",
-                error: error.message
             });
         }
     },
+
     updateCredentialTemplate: async (req, res) => {
         try {
-            const updatedTemplate = await CredentialTemplateService.updateCredentialTemplate(req.params.id, req.body);
-            return res.status(200).json({
+            const updatedTemplate = await CredentialTemplateService.updateCredentialTemplate(req.params.id, req.body, req.user);
+            return res.status(HttpStatus.OK).json({
                 message: "Credential template updated successfully",
-                data: updatedTemplate
+                data: updatedTemplate,
             });
         } catch (error) {
-            return res.status(500).json({
+            if (error instanceof AppError) {
+                return res.status(error.statusCode).json({
+                    errorCode: error.errorCode,
+                    message: error.message,
+                });
+            }
+            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+                errorCode: "SYS_001",
                 message: "Failed to update credential template",
-                error: error.message
             });
         }
     },
+
     deleteCredentialTemplate: async (req, res) => {
         try {
-            const deletedTemplate = await CredentialTemplateService.deleteCredentialTemplate(req.params.id);
-            return res.status(200).json({
+            await CredentialTemplateService.deleteCredentialTemplate(req.params.id, req.user);
+            return res.status(HttpStatus.OK).json({
                 message: "Credential template deleted successfully",
-                data: deletedTemplate
             });
         } catch (error) {
-            return res.status(500).json({
+            if (error instanceof AppError) {
+                return res.status(error.statusCode).json({
+                    errorCode: error.errorCode,
+                    message: error.message,
+                });
+            }
+            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+                errorCode: "SYS_001",
                 message: "Failed to delete credential template",
-                error: error.message
             });
         }
-    }
-}
+    },
+};
 
 export default CredentialTemplateController;

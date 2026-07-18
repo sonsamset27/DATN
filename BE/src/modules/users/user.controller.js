@@ -1,145 +1,182 @@
 import UserService from "./user.service.js";
+import AppError from "../../shared/errors/AppError.js";
+import HttpStatus from "../../shared/errors/httpStatus.js";
+import DidService from "../dids/did.service.js";
 
 const UserController = {
     findUserById: async (req, res) => {
         try {
-            const id = req.params.id;
-            const result = await UserService.findUserById(id);
-            res.status(200).json({
-                status: 200,
+            const result = await UserService.findUserById(req.params.id);
+            return res.status(HttpStatus.OK).json({
                 message: "User found successfully",
-                data: result
+                data: result,
             });
         } catch (error) {
-            res.status(500).json({
-                status: 500,
+            if (error instanceof AppError) {
+                return res.status(error.statusCode).json({
+                    errorCode: error.errorCode,
+                    message: error.message,
+                });
+            }
+            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+                errorCode: "SYS_001",
                 message: "Error finding user",
-                error: error.message
             });
         }
     },
+
     getMe: async (req, res) => {
         try {
-            const id = req.user.id;
-            const result = await UserService.findUserById(id);
-            res.status(200).json({
-                status: 200,
+            const result = await UserService.findUserById(req.user.id);
+            return res.status(HttpStatus.OK).json({
                 message: "User found successfully",
-                data: result
+                data: result,
             });
         } catch (error) {
-            res.status(500).json({
-                status: 500,
-                message: "Error finding user",
-                error: error.message
+            if (error instanceof AppError) {
+                return res.status(error.statusCode).json({
+                    errorCode: error.errorCode,
+                    message: error.message,
+                });
+            }
+            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+                errorCode: "SYS_001",
+                message: "Error fetching current user",
             });
         }
     },
+
     updateUserName: async (req, res) => {
         try {
             const { userName } = req.body;
-            const id = req.user.id;
-            const result = await UserService.updateUserName(id, userName);
-            res.status(200).json({
-                status: 200,
+            const result = await UserService.updateUserName(req.user.id, userName);
+            return res.status(HttpStatus.OK).json({
                 message: "User name updated successfully",
-                data: result
+                data: result,
             });
         } catch (error) {
-            res.status(500).json({
-                status: 500,
+            if (error instanceof AppError) {
+                return res.status(error.statusCode).json({
+                    errorCode: error.errorCode,
+                    message: error.message,
+                });
+            }
+            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+                errorCode: "SYS_001",
                 message: "Error updating user name",
-                error: error.message
             });
         }
     },
+
     findAllUsers: async (req, res) => {
         try {
             const users = await UserService.findAllUsers();
-            res.status(200).json({
-                status: 200,
+            return res.status(HttpStatus.OK).json({
                 message: "Users found successfully",
-                data: users
+                data: users,
             });
         } catch (error) {
-            res.status(500).json({
-                status: 500,
+            if (error instanceof AppError) {
+                return res.status(error.statusCode).json({
+                    errorCode: error.errorCode,
+                    message: error.message,
+                });
+            }
+            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+                errorCode: "SYS_001",
                 message: "Error finding users",
-                error: error.message
             });
         }
     },
+
     updateUserRole: async (req, res) => {
         try {
             const { role } = req.body;
-            const id = req.params.id;
-            const result = await UserService.updateUserRole(id, role);
-            res.status(200).json({
-                status: 200,
+            const result = await UserService.updateUserRole(req.params.id, role);
+            return res.status(HttpStatus.OK).json({
                 message: "User role updated successfully",
-                data: result
+                data: result,
             });
         } catch (error) {
-            res.status(500).json({
-                status: 500,
+            if (error instanceof AppError) {
+                return res.status(error.statusCode).json({
+                    errorCode: error.errorCode,
+                    message: error.message,
+                });
+            }
+            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+                errorCode: "SYS_001",
                 message: "Error updating user role",
-                error: error.message
             });
         }
     },
+
     updateUserStatus: async (req, res) => {
         try {
             const { status } = req.body;
-            const id = req.params.id;
-            const result = await UserService.updateUserStatus(id, status);
-            res.status(200).json({
-                status: 200,
+            const result = await UserService.updateUserStatus(req.params.id, status);
+            return res.status(HttpStatus.OK).json({
                 message: "User status updated successfully",
-                data: result
+                data: result,
             });
         } catch (error) {
-            res.status(500).json({
-                status: 500,
+            if (error instanceof AppError) {
+                return res.status(error.statusCode).json({
+                    errorCode: error.errorCode,
+                    message: error.message,
+                });
+            }
+            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+                errorCode: "SYS_001",
                 message: "Error updating user status",
-                error: error.message
             });
         }
     },
+
     promoteToIssuer: async (req, res) => {
         try {
             const { organizationName, organizationCode } = req.body;
-            const id = req.params.id;
-            const result = await UserService.promoteToIssuer(id, organizationName, organizationCode);
-            res.status(200).json({
-                status: 200,
+            const adminDid = await DidService.getDidByUserId(req.user);
+            const result = await UserService.promoteToIssuer(req.params.id, organizationName, organizationCode, adminDid.did);
+            return res.status(HttpStatus.OK).json({
                 message: "User promoted to issuer successfully",
-                data: result
+                data: result,
             });
         } catch (error) {
-            res.status(500).json({
-                status: 500,
+            if (error instanceof AppError) {
+                return res.status(error.statusCode).json({
+                    errorCode: error.errorCode,
+                    message: error.message,
+                });
+            }
+            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+                errorCode: "SYS_001",
                 message: "Error promoting user to issuer",
-                error: error.message
             });
         }
     },
+
     demoteOrRevokeIssuer: async (req, res) => {
         try {
-            const id = req.params.id;
-            const result = await UserService.demoteOrRevokeIssuer(id);
-            res.status(200).json({
-                status: 200,
+            const adminDid = await DidService.getDidByUserId(req.user);
+            const result = await UserService.demoteOrRevokeIssuer(req.params.id, adminDid.did);
+            return res.status(HttpStatus.OK).json({
                 message: "User demoted to holder successfully",
-                data: result
+                data: result,
             });
         } catch (error) {
-            res.status(500).json({
-                status: 500,
-                message: "Error demoting user to holder",
-                error: error.message
+            if (error instanceof AppError) {
+                return res.status(error.statusCode).json({
+                    errorCode: error.errorCode,
+                    message: error.message,
+                });
+            }
+            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+                errorCode: "SYS_001",
+                message: "Error demoting user",
             });
         }
-    }
-}
+    },
+};
 
 export default UserController;

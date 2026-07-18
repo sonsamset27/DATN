@@ -1,113 +1,100 @@
 import UserRepository from "./user.repository.js";
 import BlockchainService from "../../shared/services/blockchain.service.js";
+import AppError from "../../shared/errors/AppError.js";
+import AuditLogService from "../auditLog/auditLog.service.js";
+import DidService from "../dids/did.service.js";
+import ErrorCodes from "../../shared/errors/errorCodes.js";
 
 const UserService = {
     findUserById: async (id) => {
-        try {
-            const user = await UserRepository.findUserById(id);
-            if (!user) {
-                throw new Error("User not found");
-            }
-            return user;
-        } catch (error) {
-            throw error;
+        const user = await UserRepository.findUserById(id);
+        if (!user) {
+            throw AppError.notFound(ErrorCodes.USER_001, "User not found");
         }
+        return user;
     },
+
     updateUserName: async (id, userName) => {
-        try {
-            const user = await UserRepository.findUserById(id);
-            if (!user) {
-                throw new Error("User not found");
-            }
-            return await UserRepository.updateUserName(id, userName);
-        } catch (error) {
-            throw error;
+        const user = await UserRepository.findUserById(id);
+        if (!user) {
+            throw AppError.notFound(ErrorCodes.USER_001, "User not found");
         }
+        return await UserRepository.updateUserName(id, userName);
     },
+
     findAllUsers: async () => {
-        try {
-            const users = await UserRepository.findAllUsers();
-            if (!users) {
-                throw new Error("No users found");
-            }
-            return users;
-        } catch (error) {
-            throw error;
-        }
+        const users = await UserRepository.findAllUsers();
+        return users || [];
     },
+
     updateUserRole: async (id, role) => {
-        try {
-            const user = await UserRepository.findUserById(id);
-            if (!user) {
-                throw new Error("User not found");
-            }
-            return await UserRepository.updateUserRole(id, role);
-        } catch (error) {
-            throw error;
+        const user = await UserRepository.findUserById(id);
+        if (!user) {
+            throw AppError.notFound(ErrorCodes.USER_001, "User not found");
         }
+        return await UserRepository.updateUserRole(id, role);
     },
+
     updateUserStatus: async (id, status) => {
-        try {
-            const user = await UserRepository.findUserById(id);
-            if (!user) {
-                throw new Error("User not found");
-            }
-            return await UserRepository.updateUserStatus(id, status);
-        } catch (error) {
-            throw error;
+        const user = await UserRepository.findUserById(id);
+        if (!user) {
+            throw AppError.notFound(ErrorCodes.USER_001, "User not found");
         }
+        return await UserRepository.updateUserStatus(id, status);
     },
+
     findByWalletAddress: async (walletAddress) => {
-        try {
-            const user = await UserRepository.findUserByWalletAddress(walletAddress);
-            if (!user) {
-                throw new Error("User not found");
-            }
-            return user;
-        } catch (error) {
-            throw error;
+        const user = await UserRepository.findUserByWalletAddress(walletAddress);
+        if (!user) {
+            throw AppError.notFound(ErrorCodes.USER_001, "User not found");
         }
+        return user;
     },
+
     createUser: async (walletAddress) => {
-        try {
-            const user = await UserRepository.createUser({ walletAddress });
-            return user;
-        } catch (error) {
-            throw error;
-        }
+        return await UserRepository.createUser({ walletAddress });
     },
-    promoteToIssuer: async (id, organizationName, organizationCode) => {
-        try {
-            const user = await UserRepository.findUserById(id);
-            if (!user) {
-                throw new Error("User not found");
-            }
-            if (user.role === "ISSUER") {
-                throw new Error("User is already an issuer");
-            }
-            const tx = await BlockchainService.setRelayerStatus(user.walletAddress, true);
+
+    promoteToIssuer: async (id, organizationName, organizationCode, adminDid) => {
+        const user = await UserRepository.findUserById(id);
+        if (!user) {
+            throw AppError.notFound(ErrorCodes.USER_001, "User not found");
+        }
+        if (user.role === "ISSUER") {
+            throw AppError.conflict(ErrorCodes.USER_002, "User is already an issuer");
+        }
+        const tx = await BlockchainService.setRelayerStatus(user.walletAddress, true);
+        await tx.wait();
+        const userUpdated = await UserRepository.promoteToIssuer(id, organizationName, organizationCode);
+        AuditLogService.log(
+            adminDid,
+            "USER_PROMOTE",
+            userUpdated.id,
+            "USER",
+            { userId: userUpdated.id, userName: userUpdated.userName, walletAddress: userUpdated.walletAddress }
+        );
+        return userUpdated;
+    },
+
+    demoteOrRevokeIssuer: async (id, adminDid) => {
+        const user = await UserRepository.findUserById(id);
+        if (!user) {
+            throw AppError.notFound(ErrorCodes.USER_001, "User not found");
+        }
+        if (user.walletAddress) {
+            const tx = await BlockchainService.setRelayerStatus(user.walletAddress, false);
             await tx.wait();
-            return await UserRepository.promoteToIssuer(id, organizationName, organizationCode);
-        } catch (error) {
-            throw error;
         }
+        const userUpdated = await UserRepository.updateUserStatus(id, "DISABLE");
+        AuditLogService.log(
+            adminDid,
+            "USER_DEMOTE",
+            userUpdated.id,
+            "USER",
+            { userId: userUpdated.id, userName: userUpdated.userName, walletAddress: userUpdated.walletAddress }
+        );
+        return userUpdated;
     },
-    demoteOrRevokeIssuer: async (id) => {
-        try {
-            const user = await UserRepository.findUserById(id);
-            if (!user) {
-                throw new Error("User not found");
-            }
-            if (user.walletAddress) {
-                const tx = await BlockchainService.setRelayerStatus(user.walletAddress, false);
-                await tx.wait();
-            }
-            const updatedUser = await UserRepository.updateUserStatus(id, "DISABLE");
-            return updatedUser;
-        } catch (error) {
-            throw error;
-        }
-    }
-}
+};
 
 export default UserService;
