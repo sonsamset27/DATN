@@ -54,6 +54,8 @@ const ErrorCodes = Object.freeze({
     // ─── SYSTEM ──────────────────────────────────────────────────────
     SYS_001: "SYS_001",   // Lỗi hệ thống không xác định
     SYS_002: "SYS_002",   // Dữ liệu không hợp lệ (validation chung)
+    SYS_003: "SYS_003",   // Quá nhiều yêu cầu
+
 });
 
 export default ErrorCodes;

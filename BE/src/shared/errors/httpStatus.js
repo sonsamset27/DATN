@@ -1,6 +1,3 @@
-/**
- * Enum các HTTP Status Code chuẩn dùng trong toàn bộ hệ thống.
- */
 const HttpStatus = Object.freeze({
     OK: 200,
     CREATED: 201,

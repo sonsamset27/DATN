@@ -61,6 +61,9 @@ class AppError extends Error {
     static internal(errorCode, message) {
         return new AppError(HttpStatus.INTERNAL_SERVER_ERROR, errorCode, message);
     }
+    static tooManyRequests(errorCode, message) {
+        return new AppError(HttpStatus.TOO_MANY_REQUESTS, errorCode, message);
+    }
 }
 
 export default AppError;

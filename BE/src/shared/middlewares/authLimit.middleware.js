@@ -1,4 +1,7 @@
 import rateLimit from "express-rate-limit";
+import ErrorCodes from "../errors/errorCodes.js";
+import HttpStatus from "../errors/httpStatus.js";
+import AppError from "../errors/AppError.js";
 
 const AuthLimitMiddleware = {
     authLimiter: rateLimit({
@@ -6,8 +9,13 @@ const AuthLimitMiddleware = {
         max: 10,
         standardHeaders: true,
         legacyHeaders: false,
-        message: {
-            message: "Too many requests from this IP, please try again after 15 minutes"
+        handler: (req, res, next) => {
+            const error = new AppError(
+                HttpStatus.TOO_MANY_REQUESTS,
+                ErrorCodes.SYS_003,
+                "Too many requests from this IP, please try again after 15 minutes"
+            );
+            return next(error);
         }
     }),
     readLimiter: rateLimit({
@@ -15,8 +23,13 @@ const AuthLimitMiddleware = {
         max: 100,
         standardHeaders: true,
         legacyHeaders: false,
-        message: {
-            message: "Too many requests from this IP, please try again after 15 minutes"
+        handler: (req, res, next) => {
+            const error = new AppError(
+                HttpStatus.TOO_MANY_REQUESTS,
+                ErrorCodes.SYS_003,
+                "Too many requests from this IP, please try again after 15 minutes"
+            );
+            return next(error);
         }
     }),
     uploadLimiter: rateLimit({
@@ -24,8 +37,13 @@ const AuthLimitMiddleware = {
         max: 20,
         standardHeaders: true,
         legacyHeaders: false,
-        message: {
-            message: "Too many requests from this IP, please try again after 15 minutes"
+        handler: (req, res, next) => {
+            const error = new AppError(
+                HttpStatus.TOO_MANY_REQUESTS,
+                ErrorCodes.SYS_003,
+                "Too many requests from this IP, please try again after 15 minutes"
+            );
+            return next(error);
         }
     })
 }
