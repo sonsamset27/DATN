@@ -1,6 +1,7 @@
 import AuthService from "./auth.service.js";
 import AppError from "../../shared/errors/AppError.js";
 import HttpStatus from "../../shared/errors/httpStatus.js";
+import env from "../../configs/env.js";
 
 const AuthController = {
     generateChallenge: async (req, res) => {
@@ -26,9 +27,13 @@ const AuthController = {
         try {
             const { walletAddress, signature } = req.body;
             const result = await AuthService.verifySignature(walletAddress, signature);
+            res.cookie("accessToken", result.accessToken, {
+                httpOnly: true,
+                secure: env.NODE_ENV === "production",
+                maxAge: 60 * 60 * 1000
+            });
             return res.status(HttpStatus.OK).json({
                 message: "Login successful",
-                accessToken: result.accessToken,
                 user: result.user,
             });
         } catch (error) {

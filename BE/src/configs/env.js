@@ -2,6 +2,7 @@ import dotenv from "dotenv"
 dotenv.config()
 
 export default {
+    NODE_ENV: process.env.NODE_ENV,
     PORT: process.env.PORT,
     MONGO_URI: process.env.MONGO_URI,
     SEPOLIA_RPC_URL: process.env.SEPOLIA_RPC_URL,
