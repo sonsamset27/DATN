@@ -29,6 +29,9 @@ const AuditLogController = {
                 },
             });
         } catch (error) {
+            if (!error instanceof AppError) {
+                console.log("Error at getLogs: " + error);
+            }
             if (error instanceof AppError) {
                 return res.status(error.statusCode).json({
                     errorCode: error.errorCode,
@@ -63,6 +66,9 @@ const AuditLogController = {
                 },
             });
         } catch (error) {
+            if (!error instanceof AppError) {
+                console.log("Error at getLogsByTarget: " + error);
+            }
             if (error instanceof AppError) {
                 return res.status(error.statusCode).json({
                     errorCode: error.errorCode,

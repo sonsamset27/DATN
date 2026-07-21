@@ -10,6 +10,9 @@ const AuthController = {
             const message = await AuthService.generateChallenge(walletAddress);
             return res.status(HttpStatus.OK).json(message);
         } catch (error) {
+            if (!error instanceof AppError) {
+                console.log("Error at generateChallenge: " + error);
+            }
             if (error instanceof AppError) {
                 return res.status(error.statusCode).json({
                     errorCode: error.errorCode,
@@ -27,16 +30,15 @@ const AuthController = {
         try {
             const { walletAddress, signature } = req.body;
             const result = await AuthService.verifySignature(walletAddress, signature);
-            res.cookie("accessToken", result.accessToken, {
-                httpOnly: true,
-                secure: env.NODE_ENV === "production",
-                maxAge: 60 * 60 * 1000
-            });
             return res.status(HttpStatus.OK).json({
                 message: "Login successful",
+                accessToken: result.accessToken,
                 user: result.user,
             });
         } catch (error) {
+            if (!error instanceof AppError) {
+                console.log("Error at verifySignature: " + error);
+            }
             if (error instanceof AppError) {
                 return res.status(error.statusCode).json({
                     errorCode: error.errorCode,

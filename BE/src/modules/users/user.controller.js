@@ -12,6 +12,9 @@ const UserController = {
                 data: result,
             });
         } catch (error) {
+            if (!error instanceof AppError) {
+                console.log("Error at findUserById: " + error);
+            }
             if (error instanceof AppError) {
                 return res.status(error.statusCode).json({
                     errorCode: error.errorCode,
@@ -33,6 +36,9 @@ const UserController = {
                 data: result,
             });
         } catch (error) {
+            if (!error instanceof AppError) {
+                console.log("Error at getMe: " + error);
+            }
             if (error instanceof AppError) {
                 return res.status(error.statusCode).json({
                     errorCode: error.errorCode,
@@ -55,6 +61,9 @@ const UserController = {
                 data: result,
             });
         } catch (error) {
+            if (!error instanceof AppError) {
+                console.log("Error at updateUserName: " + error);
+            }
             if (error instanceof AppError) {
                 return res.status(error.statusCode).json({
                     errorCode: error.errorCode,
@@ -76,6 +85,9 @@ const UserController = {
                 data: users,
             });
         } catch (error) {
+            if (!error instanceof AppError) {
+                console.log("Error at findAllUsers: " + error);
+            }
             if (error instanceof AppError) {
                 return res.status(error.statusCode).json({
                     errorCode: error.errorCode,
@@ -98,6 +110,9 @@ const UserController = {
                 data: result,
             });
         } catch (error) {
+            if (!error instanceof AppError) {
+                console.log("Error at updateUserRole: " + error);
+            }
             if (error instanceof AppError) {
                 return res.status(error.statusCode).json({
                     errorCode: error.errorCode,
@@ -120,6 +135,9 @@ const UserController = {
                 data: result,
             });
         } catch (error) {
+            if (!error instanceof AppError) {
+                console.log("Error at updateUserStatus: " + error);
+            }
             if (error instanceof AppError) {
                 return res.status(error.statusCode).json({
                     errorCode: error.errorCode,
@@ -143,6 +161,9 @@ const UserController = {
                 data: result,
             });
         } catch (error) {
+            if (!error instanceof AppError) {
+                console.log("Error at promoteToIssuer: " + error);
+            }
             if (error instanceof AppError) {
                 return res.status(error.statusCode).json({
                     errorCode: error.errorCode,
@@ -165,6 +186,9 @@ const UserController = {
                 data: result,
             });
         } catch (error) {
+            if (!error instanceof AppError) {
+                console.log("Error at demoteOrRevokeIssuer: " + error);
+            }
             if (error instanceof AppError) {
                 return res.status(error.statusCode).json({
                     errorCode: error.errorCode,

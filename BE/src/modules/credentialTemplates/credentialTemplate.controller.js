@@ -11,6 +11,9 @@ const CredentialTemplateController = {
                 data: newTemplate,
             });
         } catch (error) {
+            if (!error instanceof AppError) {
+                console.log("Error at createCredentialTemplate: " + error);
+            }
             if (error instanceof AppError) {
                 return res.status(error.statusCode).json({
                     errorCode: error.errorCode,
@@ -32,6 +35,9 @@ const CredentialTemplateController = {
                 data: templates,
             });
         } catch (error) {
+            if (!error instanceof AppError) {
+                console.log("Error at getAllCredentialTemplates: " + error);
+            }
             if (error instanceof AppError) {
                 return res.status(error.statusCode).json({
                     errorCode: error.errorCode,
@@ -53,6 +59,9 @@ const CredentialTemplateController = {
                 data: template,
             });
         } catch (error) {
+            if (!error instanceof AppError) {
+                console.log("Error at getCredentialTemplateById: " + error);
+            }
             if (error instanceof AppError) {
                 return res.status(error.statusCode).json({
                     errorCode: error.errorCode,
@@ -74,6 +83,9 @@ const CredentialTemplateController = {
                 data: templates,
             });
         } catch (error) {
+            if (!error instanceof AppError) {
+                console.log("Error at getCredentialTemplateByIssuerId: " + error);
+            }
             if (error instanceof AppError) {
                 return res.status(error.statusCode).json({
                     errorCode: error.errorCode,
@@ -95,6 +107,9 @@ const CredentialTemplateController = {
                 data: updatedTemplate,
             });
         } catch (error) {
+            if (!error instanceof AppError) {
+                console.log("Error at updateCredentialTemplate: " + error);
+            }
             if (error instanceof AppError) {
                 return res.status(error.statusCode).json({
                     errorCode: error.errorCode,
@@ -115,6 +130,9 @@ const CredentialTemplateController = {
                 message: "Credential template deleted successfully",
             });
         } catch (error) {
+            if (!error instanceof AppError) {
+                console.log("Error at deleteCredentialTemplate: " + error);
+            }
             if (error instanceof AppError) {
                 return res.status(error.statusCode).json({
                     errorCode: error.errorCode,
