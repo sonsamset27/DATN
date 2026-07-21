@@ -9,12 +9,14 @@ import DidRouter from "./modules/dids/did.route.js";
 import CredentialTemplateRouter from "./modules/credentialTemplates/credentialTemplate.route.js";
 import CredentialRouter from "./modules/credential/credential.route.js";
 import AuditLogRouter from "./modules/auditLog/auditLog.route.js";
+import cookieParser from "cookie-parser";
 
 const app = express()
 
 app.use(express.json({
     limit: "1mb"
 }))
+app.use(cookieParser())
 
 // tăng cường bảo mật
 app.use(helmet())
