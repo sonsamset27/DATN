@@ -5,7 +5,7 @@ const UserRepositpry = {
         return await User.create(userData);
     },
     updateUserName: async (id, userName) => {
-        return await User.findOneAndUpdate({ _id: id }, { userName }, { returnDocument: 'after' });
+        return await User.findOneAndUpdate({ _id: id }, { userName }, { new: true });
     },
     findAllUsers: async (filter = {}, page = 1, limit = 20) => {
         const skip = (page - 1) * limit;

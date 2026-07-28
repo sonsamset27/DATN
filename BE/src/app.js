@@ -10,13 +10,33 @@ import CredentialTemplateRouter from "./modules/credentialTemplates/credentialTe
 import CredentialRouter from "./modules/credential/credential.route.js";
 import AuditLogRouter from "./modules/auditLog/auditLog.route.js";
 import cookieParser from "cookie-parser";
+import cors from "cors"
 
 const app = express()
+
 
 app.use(express.json({
     limit: "1mb"
 }))
 app.use(cookieParser())
+const allowedOrigins = [
+    'http://localhost:5173',
+    'http://localhost:5174'
+];
+
+app.use(cors({
+    origin: function (origin, callback) {
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Bị chặn bởi cấu hình CORS của Backend!'));
+        }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 // tăng cường bảo mật
 app.use(helmet())
