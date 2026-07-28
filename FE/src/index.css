@@ -1,5 +1,5 @@
 @import "tailwindcss";
-
+@custom-variant dark (&:where(.dark, .dark *));
 /* Tailwind v4: khai báo @theme để các class như text-primary, bg-primary, text-foreground hoạt động */
 @theme {
   --color-primary:    #6366F1;

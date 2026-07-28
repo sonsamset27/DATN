@@ -104,6 +104,15 @@ const BlockchainService = {
             throw error;
         }
     },
+    getDidByOwner: async (ownerAddress) => {
+        try {
+            const did = await didRegistry.getDidByOwner(ownerAddress);
+            return did;
+        } catch (error) {
+            // If revert InvalidInput or not found, it might throw
+            return null;
+        }
+    },
     issueCredential: async (data) => {
         try {
             const tx = await credentialRegistry.issueCredential(

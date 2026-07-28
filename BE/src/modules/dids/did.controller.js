@@ -11,7 +11,7 @@ const DidController = {
                 data: message,
             });
         } catch (error) {
-            if (!error instanceof AppError) {
+            if (!(error instanceof AppError)) {
                 console.log("Error at prepareCreateDid: " + error);
             }
             if (error instanceof AppError) {
@@ -36,7 +36,7 @@ const DidController = {
                 data: result,
             });
         } catch (error) {
-            if (!error instanceof AppError) {
+            if (!(error instanceof AppError)) {
                 console.log("Error at registerDid: " + error);
             }
             if (error instanceof AppError) {
@@ -60,7 +60,7 @@ const DidController = {
                 data: result,
             });
         } catch (error) {
-            if (!error instanceof AppError) {
+            if (!(error instanceof AppError)) {
                 console.log("Error at getDidByUserId: " + error);
             }
             if (error instanceof AppError) {
@@ -85,7 +85,7 @@ const DidController = {
                 data: result,
             });
         } catch (error) {
-            if (!error instanceof AppError) {
+            if (!(error instanceof AppError)) {
                 console.log("Error at getDidByAddress: " + error);
             }
             if (error instanceof AppError) {

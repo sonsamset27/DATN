@@ -12,6 +12,17 @@ const DidService = {
         if (didExist) {
             throw AppError.conflict(ErrorCodes.DID_002, "User already has a DID");
         }
+
+        try {
+            const didString = await BlockchainService.getDidByOwner(user.walletAddress);
+            if (didString && didString.length > 0) {
+                throw AppError.conflict(ErrorCodes.DID_002, "User already has a DID on blockchain. Please reload the page to sync.");
+            }
+        } catch (err) {
+            if (err instanceof AppError) throw err;
+            console.error("Error checking DID on blockchain before prepare:", err);
+        }
+
         return {
             did: `did:ethr:testnet:${user.walletAddress}`,
             publicKey: user.walletAddress,
@@ -51,8 +62,30 @@ const DidService = {
 
     getDidByUserId: async (userData) => {
         const user = await UserService.findUserById(userData.id);
-        const didDb = await DidRepository.getDidByUserId(user.id);
+        let didDb = await DidRepository.getDidByUserId(user.id);
+        
         if (!didDb) {
+            try {
+                const didString = await BlockchainService.getDidByOwner(user.walletAddress);
+                if (didString && didString.length > 0) {
+                    const didData = {
+                        did: didString,
+                        ownerId: user.id,
+                        publicKey: user.walletAddress,
+                    };
+                    didDb = await DidRepository.createDid(didData);
+                    AuditLogService.log(
+                        didString,
+                        "SYNC_DID",
+                        didString,
+                        "DID",
+                        { note: "Auto-synced from blockchain due to missing DB record" }
+                    );
+                    return didDb;
+                }
+            } catch (err) {
+                console.error("Error auto-syncing DID:", err);
+            }
             throw AppError.notFound(ErrorCodes.DID_001, "DID not found for this user");
         }
 

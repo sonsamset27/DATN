@@ -20,6 +20,7 @@ const AuditLogSchema = new mongoose.Schema(
                 "VERIFY",          // Xác minh chứng chỉ
                 "REISSUE",         // Cấp lại chứng chỉ sang ví mới
                 "REGISTER_DID",    // Đăng ký DID
+                "SYNC_DID",        // Đồng bộ DID
                 "TEMPLATE_CREATE", // Tạo mẫu chứng chỉ
                 "TEMPLATE_UPDATE", // Cập nhật mẫu chứng chỉ
                 "TEMPLATE_DELETE", // Xóa mẫu chứng chỉ

@@ -68,11 +68,10 @@ export default function UsersListPage() {
                       {u.organizationName && <div className="text-xs text-primary mt-1">{u.organizationName} ({u.organizationCode})</div>}
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`px-2 py-1 rounded text-xs font-medium ${
-                        u.role === 'ADMIN' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
-                        u.role === 'ISSUER' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' :
-                        'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                      }`}>
+                      <span className={`px-2 py-1 rounded text-xs font-medium ${u.role === 'ADMIN' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
+                          u.role === 'ISSUER' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' :
+                            'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                        }`}>
                         {u.role}
                       </span>
                     </td>
@@ -84,7 +83,7 @@ export default function UsersListPage() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       {u.role === 'HOLDER' && (
-                        <button 
+                        <button
                           onClick={() => setPromoteModal({ open: true, userId: u._id })}
                           className="text-xs font-medium text-primary hover:underline"
                         >
@@ -98,20 +97,20 @@ export default function UsersListPage() {
             </tbody>
           </table>
         </div>
-        
+
         {/* Pagination placeholder */}
         <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center text-sm">
           <span>Tổng số: {total} người dùng</span>
           <div className="flex gap-2">
-            <button 
-              disabled={page === 1} 
+            <button
+              disabled={page === 1}
               onClick={() => setPage(p => p - 1)}
               className="px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded disabled:opacity-50"
             >
               Trước
             </button>
-            <button 
-              disabled={usersList.length < 10} 
+            <button
+              disabled={usersList.length < 10}
               onClick={() => setPage(p => p + 1)}
               className="px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded disabled:opacity-50"
             >
@@ -134,9 +133,9 @@ export default function UsersListPage() {
                 <input
                   type="text"
                   value={orgForm.organizationName}
-                  onChange={(e) => setOrgForm({...orgForm, organizationName: e.target.value})}
+                  onChange={(e) => setOrgForm({ ...orgForm, organizationName: e.target.value })}
                   className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-transparent focus:ring-2 focus:ring-primary outline-none"
-                  placeholder="VD: Trường Đại học Bách Khoa"
+                  placeholder="VD: Trường Đại học Xây Dựng Hà Nội"
                   required
                 />
               </div>
@@ -145,9 +144,9 @@ export default function UsersListPage() {
                 <input
                   type="text"
                   value={orgForm.organizationCode}
-                  onChange={(e) => setOrgForm({...orgForm, organizationCode: e.target.value})}
+                  onChange={(e) => setOrgForm({ ...orgForm, organizationCode: e.target.value })}
                   className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-transparent focus:ring-2 focus:ring-primary outline-none uppercase"
-                  placeholder="VD: HUST"
+                  placeholder="VD: HUCE"
                   required
                 />
               </div>

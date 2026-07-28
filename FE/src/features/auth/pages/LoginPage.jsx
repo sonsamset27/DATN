@@ -18,12 +18,12 @@ export default function LoginPage() {
 
   return (
     <div className="flex flex-col items-center justify-center text-center space-y-8">
-      <div className="p-4 rounded-full" style={{ background: 'color-mix(in srgb, var(--primary) 15%, transparent)' }}>
-        <ShieldCheck className="w-16 h-16" style={{ color: 'var(--primary)' }} />
+      <div className="p-4 rounded-full bg-primary/15">
+        <ShieldCheck className="w-16 h-16 text-primary" />
       </div>
 
       <div>
-        <h3 className="text-xl font-semibold mb-2" style={{ color: 'var(--foreground)' }}>
+        <h3 className="text-xl font-semibold mb-2 text-foreground">
           Kết nối ví để tiếp tục
         </h3>
         <p className="text-gray-500 dark:text-gray-400 text-sm max-w-sm">
@@ -34,7 +34,7 @@ export default function LoginPage() {
       <div className="flex flex-col items-center gap-4 w-full">
         {isSigning ? (
           /* Đang ký */
-          <div className="flex items-center gap-2 font-medium" style={{ color: 'var(--primary)' }}>
+          <div className="flex items-center gap-2 font-medium text-primary">
             <Loader2 className="w-5 h-5 animate-spin" />
             <span>Đang chờ ký xác nhận trên ví...</span>
           </div>
