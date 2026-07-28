@@ -178,7 +178,7 @@ export default function MainLayout() {
           </div>
         </header>
         
-        <main className="flex-1 overflow-x-hidden overflow-y-auto p-4 sm:p-6 lg:p-8 text-foreground">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto p-4 sm:p-6 lg:p-8 text-foreground bg-background min-h-full">
           <Outlet />
         </main>
       </div>
