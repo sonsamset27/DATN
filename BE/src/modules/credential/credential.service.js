@@ -198,14 +198,13 @@ const CredentialService = {
                 id: cred._id,
                 credentialId: cred.credentialId,
                 templateId: cred.credentialTemplateId,
+                templateName: tmpl?.name || "Chứng chỉ số",
                 issuerDid: cred.issuerDid,
                 issuedAt: cred.issuedAt,
                 expiresAt: cred.expiresAt || "Never",
                 txHash: cred.txHash,
                 cid: cred.cid,
                 status: resolveCredentialStatus(cred),
-                title: tmpl?.name || "Chứng chỉ số",
-                description: tmpl?.description || "",
             };
         });
 
@@ -322,8 +321,9 @@ const CredentialService = {
             throw AppError.notFound(ErrorCodes.DID_001, "Ví mới chưa được đăng ký định danh DID");
         }
 
-        const allOldCredentials = await CredentialRepository.getCredentialsByHolderDid(oldHolderDid.did);
-        if (!allOldCredentials || allOldCredentials.length === 0) {
+        const result = await CredentialRepository.getCredentialsByHolderDid(oldHolderDid.did, {}, 1, 9999);
+        const allOldCredentials = result.data || [];
+        if (allOldCredentials.length === 0) {
             throw AppError.notFound(ErrorCodes.CREDENTIAL_005, "Ví cũ này không sở hữu chứng chỉ nào trong hệ thống");
         }
 
@@ -426,6 +426,10 @@ const CredentialService = {
             data: reissuedList,
             errors: errors.length > 0 ? errors : undefined,
         };
+    },
+
+    getCredentialStats: async () => {
+        return await CredentialRepository.getCredentialStats();
     },
 };
 

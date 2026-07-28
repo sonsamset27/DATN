@@ -221,6 +221,45 @@ CredentialRoute.get("/owner", AuthMiddleware.Authentication, AuthMiddleware.Auth
 
 /**
  * @swagger
+ * /v1/credentials/stats:
+ *   get:
+ *     summary: Lấy thống kê số lượng chứng chỉ
+ *     description: ADMIN. Trả về tổng số lượng chứng chỉ và phân loại theo trạng thái.
+ *     tags: [Credentials]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Thống kê thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     total:
+ *                       type: integer
+ *                     active:
+ *                       type: integer
+ *                     revoked:
+ *                       type: integer
+ *                     expired:
+ *                       type: integer
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
+CredentialRoute.get("/stats", AuthMiddleware.Authentication, AuthMiddleware.Authorization("ADMIN"), CredentialController.getCredentialStats);
+
+/**
+ * @swagger
  * /v1/credentials/issued:
  *   get:
  *     summary: Lấy danh sách chứng chỉ đã cấp bởi issuer hiện tại

@@ -58,9 +58,19 @@ function AdminDashboard() {
     queryKey: ['dash-templates-admin'],
     queryFn: () => templatesApi.getAllTemplates({ limit: 1 }),
   });
+  const { data: statsRes, isLoading: loadingStats } = useQuery({
+    queryKey: ['dash-creds-stats'],
+    queryFn: () => credentialsApi.getStats(),
+  });
+
+  const stats = statsRes?.data;
 
   const totalUsers = usersRes?.total ?? '—';
   const totalTemplates = templatesRes?.total ?? '—';
+  const totalCreds = stats?.total ?? '—';
+  const activeCreds = stats?.active ?? '—';
+  const revokedCreds = stats?.revoked ?? '—';
+  const expiredCreds = stats?.expired ?? '—';
 
   return (
     <>
@@ -68,6 +78,17 @@ function AdminDashboard() {
         <StatCard gradient="from-rose-500 to-pink-600" icon={Users} label="Tổng người dùng" value={totalUsers} sub="Toàn hệ thống" loading={loadingUsers} />
         <StatCard gradient="from-violet-500 to-purple-600" icon={FileBadge} label="Tổng mẫu chứng chỉ" value={totalTemplates} sub="Từ tất cả Issuer" loading={loadingTemplates} />
         <StatCard gradient="from-emerald-500 to-teal-600" icon={ShieldCheck} label="Trạng thái hệ thống" value="Online" sub="Blockchain đang hoạt động" />
+      </div>
+
+      {/* Credential Stats */}
+      <div>
+        <h2 className="text-lg font-semibold text-foreground mb-4">Thống kê chứng chỉ hệ thống</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-5">
+          <StatCard gradient="from-blue-500 to-cyan-600" icon={Award} label="Tổng chứng chỉ" value={totalCreds} sub="Đã phát hành" loading={loadingStats} />
+          <StatCard gradient="from-emerald-500 to-teal-600" icon={CheckCircle2} label="Đang hoạt động" value={activeCreds} sub="Còn hiệu lực" loading={loadingStats} />
+          <StatCard gradient="from-amber-500 to-orange-600" icon={Hash} label="Hết hạn" value={expiredCreds} sub="Đã quá hạn" loading={loadingStats} />
+          <StatCard gradient="from-red-500 to-rose-600" icon={TrendingUp} label="Đã thu hồi" value={revokedCreds} sub="Bị thu hồi" loading={loadingStats} />
+        </div>
       </div>
 
       <div>
@@ -139,29 +160,37 @@ function IssuerDashboard({ user }) {
 
 // ─── HOLDER Dashboard ─────────────────────────────────────────────────────────
 function HolderDashboard() {
-  const { data: credsRes, isLoading: loadingCreds } = useQuery({
-    queryKey: ['dash-own-creds'],
+  const { data: credsAllRes, isLoading: loadingAll } = useQuery({
+    queryKey: ['dash-own-creds-total'],
     queryFn: () => credentialsApi.getOwnCredentials({ limit: 1 }),
   });
+  const { data: credsActiveRes, isLoading: loadingActive } = useQuery({
+    queryKey: ['dash-own-creds-active'],
+    queryFn: () => credentialsApi.getOwnCredentials({ limit: 1, status: 'ACTIVE' }),
+  });
+  const { data: credsExpiredRes, isLoading: loadingExpired } = useQuery({
+    queryKey: ['dash-own-creds-expired'],
+    queryFn: () => credentialsApi.getOwnCredentials({ limit: 1, status: 'EXPIRED' }),
+  });
 
-  const totalCreds = credsRes?.total ?? '—';
-  const activeCreds = credsRes?.data?.filter(c => c.status === 'ACTIVE')?.length ?? '—';
+  const totalCreds = credsAllRes?.total ?? '—';
+  const activeCreds = credsActiveRes?.total ?? '—';
+  const expiredCreds = credsExpiredRes?.total ?? '—';
 
   return (
     <>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        <StatCard gradient="from-blue-500 to-cyan-600" icon={Award} label="Chứng chỉ của tôi" value={totalCreds} sub="Tất cả chứng chỉ nhận được" loading={loadingCreds} />
-        <StatCard gradient="from-emerald-500 to-teal-600" icon={ShieldCheck} label="Đang hoạt động" value={typeof activeCreds === 'number' ? activeCreds : '—'} sub="Chứng chỉ còn hiệu lực" loading={loadingCreds} />
-        <StatCard gradient="from-amber-500 to-orange-600" icon={Hash} label="Xác minh" value="Miễn phí" sub="Mở chia sẻ và xác minh" />
+        <StatCard gradient="from-blue-500 to-cyan-600" icon={Award} label="Chứng chỉ của tôi" value={totalCreds} sub="Tất cả chứng chỉ nhận được" loading={loadingAll} />
+        <StatCard gradient="from-emerald-500 to-teal-600" icon={ShieldCheck} label="Đang hoạt động" value={activeCreds} sub="Chứng chỉ còn hiệu lực" loading={loadingActive} />
+        <StatCard gradient="from-amber-500 to-orange-600" icon={Hash} label="Hết hạn" value={expiredCreds} sub="Chứng chỉ đã quá hạn" loading={loadingExpired} />
       </div>
 
       <div>
         <h2 className="text-lg font-semibold text-foreground mb-4">Truy cập nhanh</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           <QuickCard label="Chứng chỉ của tôi" icon={Award} href="/my-credentials" color="text-blue-500 bg-blue-50 dark:bg-blue-900/20" />
           <QuickCard label="My DID" icon={Fingerprint} href="/my-did" color="text-indigo-500 bg-indigo-50 dark:bg-indigo-900/20" />
-          <QuickCard label="Verify" icon={CheckCircle2} href="/verify" color="text-emerald-500 bg-emerald-50 dark:bg-emerald-900/20" />
-          <QuickCard label="Audit Logs" icon={Activity} href="/audit-logs" color="text-gray-500 bg-gray-50 dark:bg-gray-800" />
+          <QuickCard label="Xác minh" icon={CheckCircle2} href="/verify" color="text-emerald-500 bg-emerald-50 dark:bg-emerald-900/20" />
         </div>
       </div>
     </>
@@ -245,6 +274,11 @@ export default function DashboardPage() {
               <p className="text-sm text-primary font-medium mt-0.5">
                 <Building2 className="inline w-3.5 h-3.5 mr-1" />
                 {user.organizationName} {user.organizationCode && `(${user.organizationCode})`}
+              </p>
+            )}
+            {user?.role === 'ADMIN' && (
+              <p className="text-sm text-rose-500 font-medium mt-0.5">
+                Quản trị viên hệ thống
               </p>
             )}
           </div>

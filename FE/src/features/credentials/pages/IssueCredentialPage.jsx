@@ -5,7 +5,7 @@ import { templatesApi } from '../../templates/services/templates.api';
 import { credentialsApi } from '../services/credentials.api';
 import { useAuthStore } from '../../auth/store/auth.store';
 import toast from 'react-hot-toast';
-import { ShieldPlus, FileKey, ArrowLeft, Loader2 } from 'lucide-react';
+import { ShieldPlus, FileKey, ArrowLeft, Loader2, ShieldCheck } from 'lucide-react';
 
 export default function IssueCredentialPage() {
   const navigate = useNavigate();
@@ -38,8 +38,8 @@ export default function IssueCredentialPage() {
     setSelectedTemplate(tpl);
     // Reset subject data form
     const initData = {};
-    if (tpl?.schema) {
-      tpl.schema.forEach(field => {
+    if (tpl?.fields) {
+      tpl.fields.forEach(field => {
         initData[field.name] = field.type === 'number' ? 0 : '';
       });
     }
@@ -57,7 +57,7 @@ export default function IssueCredentialPage() {
     
     // Convert subjectData types based on schema
     const formattedSubject = {};
-    selectedTemplate.schema.forEach(field => {
+    (selectedTemplate.fields || []).forEach(field => {
       let val = subjectData[field.name];
       if (field.type === 'number') val = Number(val);
       if (field.type === 'boolean') val = Boolean(val);
@@ -71,7 +71,7 @@ export default function IssueCredentialPage() {
     };
     
     if (expiresAt) {
-      payload.expirateAt = new Date(expiresAt).toISOString();
+      payload.expiresAt = new Date(expiresAt).toISOString();
     }
 
     issueMutation.mutate(payload);
@@ -118,7 +118,7 @@ export default function IssueCredentialPage() {
                 >
                   <option value="" disabled>-- Chọn mẫu chứng chỉ --</option>
                   {templates.map(tpl => (
-                    <option key={tpl._id} value={tpl._id}>{tpl.title}</option>
+                    <option key={tpl._id} value={tpl._id}>{tpl.name}</option>
                   ))}
                 </select>
               </div>
@@ -150,25 +150,50 @@ export default function IssueCredentialPage() {
               <div className="space-y-4 pt-4 border-t border-gray-100 dark:border-gray-700">
                 <h3 className="font-semibold text-lg flex items-center gap-2">
                   <FileKey className="text-secondary" size={20} /> 
-                  2. Dữ liệu chứng chỉ ({selectedTemplate.title})
+                  2. Dữ liệu chứng chỉ ({selectedTemplate.name})
                 </h3>
                 <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-gray-700 space-y-4">
-                  {selectedTemplate.schema.map((field) => (
+                  {(selectedTemplate.fields || []).map((field) => (
                     <div key={field.name}>
-                      <label className="block text-sm font-medium mb-1 capitalize">
-                        {field.name} {field.required && <span className="text-danger">*</span>}
+                      <label className="block text-sm font-medium mb-1">
+                        {field.label || field.name} {field.required && <span className="text-danger">*</span>}
                         <span className="text-xs text-gray-400 lowercase ml-2">({field.type})</span>
                       </label>
-                      <input
-                        type={field.type === 'number' ? 'number' : field.type === 'date' ? 'date' : 'text'}
-                        value={subjectData[field.name]}
-                        onChange={(e) => handleSubjectChange(field.name, e.target.value)}
-                        className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-secondary outline-none"
-                        required={field.required}
-                      />
+                      {field.type === 'select' ? (
+                        <select
+                          value={subjectData[field.name] || ''}
+                          onChange={(e) => handleSubjectChange(field.name, e.target.value)}
+                          className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-secondary outline-none"
+                          required={field.required}
+                        >
+                          <option value="" disabled>-- Chọn {field.label || field.name} --</option>
+                          {(field.options || []).map(opt => (
+                            <option key={opt} value={opt}>{opt}</option>
+                          ))}
+                        </select>
+                      ) : field.type === 'boolean' ? (
+                        <select
+                          value={subjectData[field.name] === true ? 'true' : subjectData[field.name] === false ? 'false' : ''}
+                          onChange={(e) => handleSubjectChange(field.name, e.target.value === 'true')}
+                          className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-secondary outline-none"
+                          required={field.required}
+                        >
+                          <option value="" disabled>-- Chọn True / False --</option>
+                          <option value="true">True</option>
+                          <option value="false">False</option>
+                        </select>
+                      ) : (
+                        <input
+                          type={field.type === 'number' ? 'number' : field.type === 'date' ? 'date' : 'text'}
+                          value={subjectData[field.name] || ''}
+                          onChange={(e) => handleSubjectChange(field.name, e.target.value)}
+                          className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-secondary outline-none"
+                          required={field.required}
+                        />
+                      )}
                     </div>
                   ))}
-                  {selectedTemplate.schema.length === 0 && (
+                  {(selectedTemplate.fields || []).length === 0 && (
                     <p className="text-sm text-gray-500 italic">Mẫu này không có trường dữ liệu cụ thể.</p>
                   )}
                 </div>

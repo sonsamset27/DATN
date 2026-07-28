@@ -36,11 +36,11 @@ export default function MainLayout() {
   };
 
   return (
-    <div className="min-h-screen flex bg-background text-foreground transition-colors duration-300">
-      
+    <div className="fixed inset-0 flex bg-background text-foreground transition-colors duration-300 overflow-hidden">
+
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
-        <div 
+        <div
           className="fixed inset-0 z-40 bg-black/50 md:hidden backdrop-blur-sm transition-opacity"
           onClick={() => setIsMobileMenuOpen(false)}
         />
@@ -54,8 +54,8 @@ export default function MainLayout() {
             <img src={logo} alt="logo" className="w-10 h-10" />
             <span className="text-base text-gray-900 dark:text-white whitespace-nowrap font-bold">Digital Credentials</span>
           </div>
-          <button 
-            className="md:hidden p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800" 
+          <button
+            className="md:hidden p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
             onClick={() => setIsMobileMenuOpen(false)}
           >
             <X size={20} />
@@ -111,22 +111,23 @@ export default function MainLayout() {
 
           {user?.role === 'HOLDER' && (
             <Link to="/my-credentials" className={navLinkClass('/my-credentials')} onClick={handleLinkClick}>
-              <ShieldCheck size={18} />
+              <Award size={18} />
               <span>Chứng chỉ của tôi</span>
             </Link>
           )}
 
           {(user?.role === 'ADMIN' || user?.role === 'ISSUER') && (
-            <>
-              <Link to="/templates" className={navLinkClass('/templates')} onClick={handleLinkClick}>
-                <FileBadge size={18} />
-                <span>Templates</span>
-              </Link>
-              <Link to="/issued-credentials" className={navLinkClass('/issued-credentials')} onClick={handleLinkClick}>
-                <Award size={18} />
-                <span>Chứng chỉ đã cấp</span>
-              </Link>
-            </>
+            <Link to="/templates" className={navLinkClass('/templates')} onClick={handleLinkClick}>
+              <FileBadge size={18} />
+              <span>Templates</span>
+            </Link>
+          )}
+
+          {user?.role === 'ISSUER' && (
+            <Link to="/issued-credentials" className={navLinkClass('/issued-credentials')} onClick={handleLinkClick}>
+              <Award size={18} />
+              <span>Chứng chỉ đã cấp</span>
+            </Link>
           )}
 
           <Link to="/verify" className={navLinkClass('/verify')} onClick={handleLinkClick}>
@@ -151,7 +152,7 @@ export default function MainLayout() {
       <div className="flex-1 flex flex-col min-w-0 max-w-full overflow-hidden">
         <header className="h-16 flex items-center justify-between px-4 sm:px-6 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-[#151522] transition-colors shrink-0">
           <div className="flex items-center md:hidden gap-3">
-            <button 
+            <button
               onClick={() => setIsMobileMenuOpen(true)}
               className="p-2 -ml-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
             >
@@ -161,7 +162,7 @@ export default function MainLayout() {
           </div>
           <div className="hidden md:flex flex-1" />
           <div className="flex-1 md:hidden" />
-          
+
           <div className="flex items-center gap-3">
             <ThemeToggle />
             {/* Header avatar + name */}
@@ -177,8 +178,8 @@ export default function MainLayout() {
             </div>
           </div>
         </header>
-        
-        <main className="flex-1 overflow-x-hidden overflow-y-auto p-4 sm:p-6 lg:p-8 text-foreground bg-background min-h-full">
+
+        <main className="flex-1 overflow-x-hidden overflow-y-auto p-4 sm:p-6 lg:p-8 text-foreground bg-background">
           <Outlet />
         </main>
       </div>

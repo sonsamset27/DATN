@@ -163,6 +163,31 @@ const CredentialController = {
             });
         }
     },
+
+    getCredentialStats: async (req, res) => {
+        try {
+            const stats = await CredentialService.getCredentialStats();
+            return res.status(HttpStatus.OK).json({
+                message: "Credential stats fetched successfully",
+                data: stats,
+            });
+        } catch (error) {
+            if (!error instanceof AppError) {
+                console.log("Error at getCredentialStats: " + error);
+            }
+            if (error instanceof AppError) {
+                return res.status(error.statusCode).json({
+                    errorCode: error.errorCode,
+                    message: error.message,
+                });
+            }
+            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+                errorCode: "SYS_001",
+                message: "Failed to fetch credential stats",
+                error: error.message,
+            });
+        }
+    },
 };
 
 export default CredentialController;

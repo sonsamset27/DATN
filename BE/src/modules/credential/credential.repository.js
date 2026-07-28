@@ -52,6 +52,60 @@ const CredentialRepository = {
     getCredentialsByTemplateIds: async (templateIds) => {
         return await Credential.find({ credentialTemplateId: { $in: templateIds } });
     },
+
+    getCredentialStats: async () => {
+        const now = new Date();
+        const stats = await Credential.aggregate([
+            {
+                $group: {
+                    _id: null,
+                    total: { $sum: 1 },
+                    revoked: {
+                        $sum: { $cond: [{ $eq: ["$status", "REVOKED"] }, 1, 0] }
+                    },
+                    expired: {
+                        $sum: {
+                            $cond: [
+                                {
+                                    $and: [
+                                        { $ne: ["$status", "REVOKED"] },
+                                        { $ne: ["$expiresAt", null] },
+                                        { $lt: ["$expiresAt", now] }
+                                    ]
+                                },
+                                1, 0
+                            ]
+                        }
+                    },
+                    active: {
+                        $sum: {
+                            $cond: [
+                                {
+                                    $and: [
+                                        { $ne: ["$status", "REVOKED"] },
+                                        {
+                                            $or: [
+                                                { $eq: ["$expiresAt", null] },
+                                                { $gte: ["$expiresAt", now] }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                1, 0
+                            ]
+                        }
+                    }
+                }
+            }
+        ]);
+        
+        if (stats.length === 0) {
+            return { total: 0, active: 0, revoked: 0, expired: 0 };
+        }
+        
+        const { total, active, revoked, expired } = stats[0];
+        return { total, active, revoked, expired };
+    },
 };
 
 export default CredentialRepository;

@@ -1,21 +1,29 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { auditLogsApi } from '../services/audit-logs.api';
-import { Activity, ShieldAlert, Key, UserPlus, Fingerprint } from 'lucide-react';
+import { Activity, ShieldAlert, Key, UserPlus, Fingerprint, FileText, Search } from 'lucide-react';
 
 export default function AuditLogsPage() {
   const [page, setPage] = useState(1);
+  const [searchInput, setSearchInput] = useState('');
+  const [actorDid, setActorDid] = useState('');
   
   const { data: logsRes, isLoading } = useQuery({
-    queryKey: ['audit-logs', page],
-    queryFn: () => auditLogsApi.getLogs({ page, limit: 15 })
+    queryKey: ['audit-logs', page, actorDid],
+    queryFn: () => auditLogsApi.getLogs({ page, limit: 15, actorDid: actorDid || undefined })
   });
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    setActorDid(searchInput);
+    setPage(1);
+  };
 
   const logs = logsRes?.data || [];
   const total = logsRes?.total || 0;
 
   const getActionIcon = (action) => {
-    if (action.includes('ISSUE') || action.includes('REVOKE')) return <FileKey className="text-secondary" size={18} />;
+    if (action.includes('ISSUE') || action.includes('REVOKE')) return <FileText className="text-secondary" size={18} />;
     if (action.includes('REGISTER_DID')) return <Fingerprint className="text-primary" size={18} />;
     if (action.includes('PROMOTE') || action.includes('DEMOTE')) return <UserPlus className="text-warning" size={18} />;
     if (action.includes('LOGIN')) return <Key className="text-success" size={18} />;
@@ -39,6 +47,31 @@ export default function AuditLogsPage() {
         <p className="text-gray-500 mt-1">Lịch sử mọi hành động thay đổi trạng thái trong hệ thống.</p>
       </div>
 
+      <form onSubmit={handleSearch} className="flex gap-2">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+          <input
+            type="text"
+            placeholder="Tìm kiếm theo Actor DID..."
+            className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary/50"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+          />
+        </div>
+        <button type="submit" className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+          Tìm kiếm
+        </button>
+        {actorDid && (
+          <button 
+            type="button" 
+            onClick={() => { setSearchInput(''); setActorDid(''); setPage(1); }} 
+            className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+          >
+            Xóa lọc
+          </button>
+        )}
+      </form>
+
       <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
         {isLoading ? (
           <div className="text-center py-12">Đang tải lịch sử...</div>
@@ -55,14 +88,14 @@ export default function AuditLogsPage() {
                       {log.action}
                     </span>
                     <span className="text-xs text-gray-400">
-                      {new Date(log.createdAt).toLocaleString()}
+                      {new Date(log.timestamp).toLocaleString()}
                     </span>
                   </div>
                   <p className="text-sm font-medium text-foreground">
-                    Actor: <span className="font-mono font-normal text-xs">{log.actorWallet || log.actorId}</span>
+                    Actor: <span className="font-mono font-normal text-xs">{log.actorDid}</span>
                   </p>
                   <p className="text-xs text-gray-500 font-mono break-all bg-gray-50 dark:bg-gray-900 p-2 rounded mt-2">
-                    {JSON.stringify(log.details)}
+                    {JSON.stringify(log.metadata)}
                   </p>
                 </div>
               </div>
