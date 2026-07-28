@@ -133,11 +133,6 @@ export default function MainLayout() {
             <ShieldCheck size={18} />
             <span>Verify</span>
           </Link>
-
-          <Link to="/profile" className={navLinkClass('/profile')} onClick={handleLinkClick}>
-            <User size={18} />
-            <span>Profile</span>
-          </Link>
         </nav>
 
         {/* Logout */}

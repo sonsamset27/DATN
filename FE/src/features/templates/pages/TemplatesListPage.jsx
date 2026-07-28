@@ -13,6 +13,7 @@ export default function TemplatesListPage() {
 
   // State
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [editingId, setEditingId] = useState(null);
   const [detailTemplate, setDetailTemplate] = useState(null); // template detail to show
   const [deleteConfirm, setDeleteConfirm] = useState(null);   // template id to delete
   const [searchTerm, setSearchTerm] = useState('');
@@ -42,6 +43,7 @@ export default function TemplatesListPage() {
   const [formData, setFormData] = useState({ name: '', description: '', fields: [] });
   const [fieldForm, setFieldForm] = useState({ name: '', label: '', type: 'string', required: true, options: [] });
   const [optionInput, setOptionInput] = useState('');
+  const [editingFieldIndex, setEditingFieldIndex] = useState(null);
 
   const createMutation = useMutation({
     mutationFn: templatesApi.createTemplate,
@@ -63,10 +65,26 @@ export default function TemplatesListPage() {
       toast.success('Đã xoá mẫu chứng chỉ!');
       setDeleteConfirm(null);
       setDetailTemplate(null);
-      queryClient.invalidateQueries(['templates']);
+      queryClient.removeQueries({ queryKey: ['template-detail'] });
+      queryClient.invalidateQueries({ queryKey: ['templates'] });
     },
     onError: (err) => {
       toast.error(err?.response?.data?.message || 'Xoá thất bại');
+    }
+  });
+
+  // ---- Update ----
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }) => templatesApi.updateTemplate(id, data),
+    onSuccess: () => {
+      toast.success('Cập nhật mẫu chứng chỉ thành công!');
+      setShowCreateModal(false);
+      resetForm();
+      queryClient.removeQueries({ queryKey: ['template-detail'] });
+      queryClient.invalidateQueries({ queryKey: ['templates'] });
+    },
+    onError: (err) => {
+      toast.error(err?.response?.data?.message || 'Cập nhật thất bại');
     }
   });
 
@@ -75,14 +93,41 @@ export default function TemplatesListPage() {
     setFormData({ name: '', description: '', fields: [] });
     setFieldForm({ name: '', label: '', type: 'string', required: true, options: [] });
     setOptionInput('');
+    setEditingId(null);
+    setEditingFieldIndex(null);
+  };
+
+  const handleOpenEdit = (tpl) => {
+    setFormData({ name: tpl.name, description: tpl.description, fields: tpl.fields });
+    setEditingId(tpl._id);
+    setDetailTemplate(null);
+    setShowCreateModal(true);
   };
 
   const handleAddField = () => {
     if (!fieldForm.name || !fieldForm.label) return toast.error('Nhập tên và nhãn trường');
-    if (formData.fields.some(f => f.name === fieldForm.name)) return toast.error('Tên trường đã tồn tại');
+    
+    const duplicate = formData.fields.findIndex(f => f.name === fieldForm.name);
+    if (duplicate !== -1 && duplicate !== editingFieldIndex) return toast.error('Tên trường đã tồn tại');
+    
     if (fieldForm.type === 'select' && fieldForm.options.length === 0) return toast.error('Trường select cần ít nhất 1 option');
-    setFormData({ ...formData, fields: [...formData.fields, { ...fieldForm }] });
+    
+    if (editingFieldIndex !== null) {
+      const updatedFields = [...formData.fields];
+      updatedFields[editingFieldIndex] = { ...fieldForm };
+      setFormData({ ...formData, fields: updatedFields });
+      setEditingFieldIndex(null);
+    } else {
+      setFormData({ ...formData, fields: [...formData.fields, { ...fieldForm }] });
+    }
+    
     setFieldForm({ name: '', label: '', type: 'string', required: true, options: [] });
+    setOptionInput('');
+  };
+
+  const handleEditField = (idx) => {
+    setFieldForm({ ...formData.fields[idx] });
+    setEditingFieldIndex(idx);
     setOptionInput('');
   };
 
@@ -106,10 +151,17 @@ export default function TemplatesListPage() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (fieldForm.name || fieldForm.label) {
+      return toast.error('Bạn đang nhập dở 1 trường dữ liệu. Vui lòng bấm "+ Thêm trường" trước khi lưu!');
+    }
     if (!formData.name || formData.fields.length === 0) {
       return toast.error('Vui lòng nhập tên mẫu và ít nhất 1 trường dữ liệu');
     }
-    createMutation.mutate(formData);
+    if (editingId) {
+      updateMutation.mutate({ id: editingId, data: formData });
+    } else {
+      createMutation.mutate(formData);
+    }
   };
 
   const templates = templatesRes?.data || [];
@@ -256,7 +308,7 @@ export default function TemplatesListPage() {
       {/* ========== DETAIL MODAL ========== */}
       <AnimatePresence>
         {detailTemplate && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" onClick={() => setDetailTemplate(null)}>
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" onMouseDown={(e) => { if (e.target === e.currentTarget) setDetailTemplate(null); }}>
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -335,6 +387,12 @@ export default function TemplatesListPage() {
                   {/* Actions */}
                   <div className="flex justify-end gap-3 pt-2 border-t border-gray-100 dark:border-gray-700">
                     <button
+                      onClick={() => handleOpenEdit(detail)}
+                      className="flex items-center gap-2 px-4 py-2 text-primary hover:bg-primary/10 rounded-lg transition-colors text-sm font-medium cursor-pointer"
+                    >
+                      <Edit size={16} /> Sửa
+                    </button>
+                    <button
                       onClick={() => setDeleteConfirm(detail._id)}
                       className="flex items-center gap-2 px-4 py-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors text-sm font-medium cursor-pointer"
                     >
@@ -351,7 +409,7 @@ export default function TemplatesListPage() {
       {/* ========== DELETE CONFIRM ========== */}
       <AnimatePresence>
         {deleteConfirm && (
-          <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => setDeleteConfirm(null)}>
+          <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onMouseDown={(e) => { if (e.target === e.currentTarget) setDeleteConfirm(null); }}>
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -386,7 +444,7 @@ export default function TemplatesListPage() {
       {/* ========== CREATE MODAL ========== */}
       <AnimatePresence>
         {showCreateModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" onClick={() => setShowCreateModal(false)}>
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" onMouseDown={(e) => { if (e.target === e.currentTarget) setShowCreateModal(false); }}>
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -395,8 +453,8 @@ export default function TemplatesListPage() {
               onClick={e => e.stopPropagation()}
             >
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold">Tạo Mẫu Chứng Chỉ Mới</h2>
-                <button onClick={() => setShowCreateModal(false)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors cursor-pointer">
+                <h2 className="text-xl font-bold">{editingId ? 'Sửa Mẫu Chứng Chỉ' : 'Tạo Mẫu Chứng Chỉ Mới'}</h2>
+                <button onClick={() => { setShowCreateModal(false); resetForm(); }} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors cursor-pointer">
                   <X size={20} />
                 </button>
               </div>
@@ -510,9 +568,9 @@ export default function TemplatesListPage() {
                   <button
                     type="button"
                     onClick={handleAddField}
-                    className="w-full px-4 py-2 bg-secondary text-white rounded-lg text-sm hover:bg-secondary/90 transition-colors font-medium cursor-pointer"
+                    className={`w-full px-4 py-2 text-white rounded-lg text-sm transition-colors font-medium cursor-pointer ${editingFieldIndex !== null ? 'bg-indigo-500 hover:bg-indigo-600' : 'bg-secondary hover:bg-secondary/90'}`}
                   >
-                    + Thêm trường
+                    {editingFieldIndex !== null ? 'Cập nhật trường này' : '+ Thêm trường'}
                   </button>
 
                   {/* Added fields preview */}
@@ -528,9 +586,14 @@ export default function TemplatesListPage() {
                           {field.required && <span className="text-[10px] text-red-400 font-bold">*</span>}
                           {field.type === 'select' && <span className="text-[10px] text-gray-400">[{field.options.join(', ')}]</span>}
                         </div>
-                        <button type="button" onClick={() => handleRemoveField(idx)} className="text-red-400 hover:text-red-600 p-1 cursor-pointer">
-                          <Trash2 size={14} />
-                        </button>
+                        <div className="flex items-center gap-1">
+                          <button type="button" onClick={() => handleEditField(idx)} className="text-blue-500 hover:text-blue-700 p-1 cursor-pointer">
+                            <Edit size={14} />
+                          </button>
+                          <button type="button" onClick={() => handleRemoveField(idx)} className="text-red-400 hover:text-red-600 p-1 cursor-pointer">
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
                       </div>
                     ))}
                     {formData.fields.length === 0 && (
@@ -540,11 +603,11 @@ export default function TemplatesListPage() {
                 </div>
 
                 <div className="flex justify-end gap-3 pt-2">
-                  <button type="button" onClick={() => setShowCreateModal(false)} className="px-5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm cursor-pointer">
+                  <button type="button" onClick={() => { setShowCreateModal(false); resetForm(); }} className="px-5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm cursor-pointer">
                     Huỷ
                   </button>
-                  <button type="submit" disabled={createMutation.isPending} className="px-5 py-2.5 bg-primary text-white rounded-xl disabled:opacity-70 hover:bg-primary/90 transition-colors text-sm font-medium cursor-pointer">
-                    {createMutation.isPending ? 'Đang lưu...' : 'Lưu Template'}
+                  <button type="submit" disabled={createMutation.isPending || updateMutation.isPending} className="px-5 py-2.5 bg-primary text-white rounded-xl disabled:opacity-70 hover:bg-primary/90 transition-colors text-sm font-medium cursor-pointer">
+                    {createMutation.isPending || updateMutation.isPending ? 'Đang lưu...' : (editingId ? 'Cập nhật Template' : 'Lưu Template')}
                   </button>
                 </div>
               </form>

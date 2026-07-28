@@ -17,7 +17,6 @@ import IssueCredentialPage from '../features/credentials/pages/IssueCredentialPa
 import AuditLogsPage from '../features/audit-logs/pages/AuditLogsPage';
 
 // Placeholder Pages
-const Profile = () => <div className="p-4">Profile Page (Coming soon)</div>;
 
 export const router = createBrowserRouter([
   {
@@ -36,7 +35,6 @@ export const router = createBrowserRouter([
           { path: 'issued-credentials', element: <IssuedCredentialsPage /> },
           { path: 'issue-credential', element: <IssueCredentialPage /> },
           { path: 'audit-logs', element: <AuditLogsPage /> },
-          { path: 'profile', element: <Profile /> },
           { path: 'verify', element: <VerifyCredentialPage /> },
           // Các route khác sẽ thêm sau (credentials, templates, users, dids)
         ]

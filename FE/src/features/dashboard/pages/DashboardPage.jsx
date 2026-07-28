@@ -85,6 +85,11 @@ export default function DashboardPage() {
               user?.userName || <span className="text-gray-400 italic">Chưa đặt tên</span>
             )}
           </h1>
+          {user?.role === 'ISSUER' && user?.organizationName && (
+            <p className="text-sm text-primary font-medium mt-1 flex items-center gap-1.5">
+              Tổ chức: {user.organizationName} {user.organizationCode && `(${user.organizationCode})`}
+            </p>
+          )}
         </div>
       </div>
 
