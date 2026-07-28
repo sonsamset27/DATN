@@ -310,10 +310,10 @@ export default function MyCredentialsPage() {
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Award className="text-primary" /> Chứng chỉ của tôi
+          <h1 className="text-xl sm:text-2xl font-bold flex items-center gap-2">
+            <Award className="text-primary shrink-0" /> Chứng chỉ của tôi
           </h1>
           <p className="text-gray-500 mt-1 text-sm">
             Tổng cộng <span className="font-semibold text-foreground">{total}</span> chứng chỉ đã được cấp
@@ -321,7 +321,7 @@ export default function MyCredentialsPage() {
         </div>
 
         {/* Status filter */}
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           {['', 'ACTIVE', 'REVOKED', 'EXPIRED'].map(s => (
             <button
               key={s}

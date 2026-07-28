@@ -17,7 +17,7 @@ function StatusBadge({ status }) {
     EXPIRED: { cls: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400', label: 'Hết hạn' },
   };
   const { cls, label } = cfg[status] || cfg.ACTIVE;
-  return <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold ${cls}`}>{label}</span>;
+  return <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold whitespace-nowrap ${cls}`}>{label}</span>;
 }
 
 // ─── Copy Button ──────────────────────────────────────────────────────────────
@@ -81,7 +81,7 @@ function DetailSidebar({ cred, onClose }) {
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
-              className={`flex-1 py-3 text-xs font-semibold transition-colors ${tab === t.id ? 'text-primary border-b-2 border-primary' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`}
+              className={`flex-1 py-3 text-xs font-semibold transition-colors whitespace-nowrap px-1 ${tab === t.id ? 'text-primary border-b-2 border-primary' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`}
             >
               {t.label}
             </button>
@@ -328,52 +328,54 @@ export default function IssuedCredentialsPage() {
       </div>
 
       {/* Search + Filter bar */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <form onSubmit={handleSearch} className="flex gap-2 flex-1">
-          <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-            <input
-              type="text"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              placeholder="Tìm theo Holder DID hoặc địa chỉ ví..."
-              className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
-            />
-          </div>
-          <button type="submit" className="px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-medium hover:bg-primary/90 transition-colors">
-            Tìm
-          </button>
-          {holderDid && (
-            <button
-              type="button"
-              onClick={() => { setSearchInput(''); setHolderDid(''); setPage(1); }}
-              className="px-3 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-xl text-sm hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-            >
-              <X size={16} />
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col sm:flex-row gap-3">
+          <form onSubmit={handleSearch} className="flex gap-2 flex-1">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+              <input
+                type="text"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                placeholder="Tìm theo Holder DID..."
+                className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 text-foreground"
+              />
+            </div>
+            <button type="submit" className="px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-medium hover:bg-primary/90 transition-colors shrink-0">
+              Tìm
             </button>
-          )}
-        </form>
+            {holderDid && (
+              <button
+                type="button"
+                onClick={() => { setSearchInput(''); setHolderDid(''); setPage(1); }}
+                className="px-3 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-xl text-sm hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors shrink-0"
+              >
+                <X size={16} />
+              </button>
+            )}
+          </form>
 
-        <div className="flex gap-1.5">
-          {['', 'ACTIVE', 'REVOKED', 'EXPIRED'].map(s => (
-            <button
-              key={s}
-              onClick={() => { setStatusFilter(s); setPage(1); }}
-              className={`px-3 py-2 rounded-lg text-xs font-medium transition-colors border ${statusFilter === s
-                  ? 'bg-primary text-white border-primary'
-                  : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-primary'
-                }`}
-            >
-              {s === '' ? 'Tất cả' : s === 'ACTIVE' ? 'Hiệu lực' : s === 'REVOKED' ? 'Thu hồi' : 'Hết hạn'}
-            </button>
-          ))}
+          <div className="flex gap-1.5 flex-wrap">
+            {['', 'ACTIVE', 'REVOKED', 'EXPIRED'].map(s => (
+              <button
+                key={s}
+                onClick={() => { setStatusFilter(s); setPage(1); }}
+                className={`px-3 py-2 rounded-lg text-xs font-medium transition-colors border ${statusFilter === s
+                    ? 'bg-primary text-white border-primary'
+                    : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-primary'
+                  }`}
+              >
+                {s === '' ? 'Tất cả' : s === 'ACTIVE' ? 'Hiệu lực' : s === 'REVOKED' ? 'Thu hồi' : 'Hết hạn'}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
       {/* Table */}
       <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
+        <div className="overflow-x-auto -mx-px">
+          <table className="w-full min-w-[780px] text-left text-sm">
             <thead className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-900 border-b border-gray-100 dark:border-gray-700">
               <tr>
                 <th className="px-5 py-4">Credential ID</th>

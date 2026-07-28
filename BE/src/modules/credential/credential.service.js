@@ -143,9 +143,24 @@ const CredentialService = {
         const credentialHash = "0x" + crypto.createHash("sha256").update(jsonString).digest("hex");
         const credentialHashBlockchain = await BlockchainService.getCredentialHash(credentialId);
 
-        if (credentialHash !== credentialHashBlockchain) {
-            throw AppError.unprocessable(ErrorCodes.CREDENTIAL_002, "Credential hash does not match – possible tampering detected");
-        }
+        const isHashValid = credentialHash === credentialHashBlockchain;
+        const isRevoked = credential.status === "REVOKED";
+        const isExpired = credential.expiresAt && new Date(credential.expiresAt) < new Date();
+
+        let finalStatus = "VERIFIED";
+        if (!isHashValid) finalStatus = "TAMPERED";
+        else if (isRevoked) finalStatus = "REVOKED";
+        else if (isExpired) finalStatus = "EXPIRED";
+
+        // Load template name
+        let templateName = null;
+        try {
+            const template = await CredentialTemplateService.getCredentialTemplateById(
+                dataIpfs.credentialTemplateId || credential.credentialTemplateId
+            );
+            templateName = template?.name || null;
+        } catch { }
+
         AuditLogService.log(
             dataIpfs.holderDid,
             "VERIFY",
@@ -155,7 +170,9 @@ const CredentialService = {
         );
 
         return {
-            status: "VERIFIED",
+            status: finalStatus,
+            isValid: isHashValid && !isRevoked && !isExpired,
+            templateName,
             metadata: {
                 credentialId: dataIpfs.credentialId,
                 issuerDid: dataIpfs.issuerDid,
@@ -168,7 +185,10 @@ const CredentialService = {
             subjectData: dataIpfs.credentialSubject,
             blockchainProof: {
                 credentialHash,
+                blockchainHash: credentialHashBlockchain,
                 txHash: credential.txHash,
+                cid: credential.cid,
+                isHashValid,
             },
         };
     },

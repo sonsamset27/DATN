@@ -539,7 +539,7 @@ export default function TemplatesListPage() {
                   {fieldForm.type === 'select' && (
                     <div className="space-y-2 pl-1">
                       <label className="block text-xs text-gray-500">Options cho Select</label>
-                      <div className="flex gap-2">
+                      <div className="flex flex-col sm:flex-row gap-2">
                         <input
                           type="text"
                           placeholder="Nhập option..."
@@ -548,7 +548,7 @@ export default function TemplatesListPage() {
                           onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddOption(); } }}
                           className="flex-1 px-3 py-1.5 text-sm rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 outline-none"
                         />
-                        <button type="button" onClick={handleAddOption} className="px-3 py-1.5 bg-gray-200 dark:bg-gray-700 rounded-lg text-sm hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors cursor-pointer">
+                        <button type="button" onClick={handleAddOption} className="px-3 py-1.5 bg-gray-200 dark:bg-gray-700 rounded-lg text-sm hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors cursor-pointer whitespace-nowrap">
                           Thêm
                         </button>
                       </div>
@@ -576,17 +576,17 @@ export default function TemplatesListPage() {
                   {/* Added fields preview */}
                   <div className="space-y-2 mt-3">
                     {formData.fields.map((field, idx) => (
-                      <div key={idx} className="flex items-center justify-between bg-white dark:bg-gray-800 p-2.5 rounded-lg border border-gray-200 dark:border-gray-700">
-                        <div className="flex items-center gap-2 min-w-0">
-                          <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full shrink-0 ${typeBadge(field.type)}`}>
+                      <div key={idx} className="flex items-center justify-between bg-white dark:bg-gray-800 p-2.5 rounded-lg border border-gray-200 dark:border-gray-700 gap-2">
+                        <div className="flex flex-wrap items-center gap-1.5 min-w-0 flex-1">
+                          <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full shrink-0 whitespace-nowrap ${typeBadge(field.type)}`}>
                             {field.type}
                           </span>
-                          <span className="text-sm font-semibold truncate">{field.label}</span>
-                          <span className="text-xs text-gray-400 font-mono">({field.name})</span>
-                          {field.required && <span className="text-[10px] text-red-400 font-bold">*</span>}
-                          {field.type === 'select' && <span className="text-[10px] text-gray-400">[{field.options.join(', ')}]</span>}
+                          <span className="text-sm font-semibold truncate max-w-[120px] sm:max-w-none">{field.label}</span>
+                          <span className="text-xs text-gray-400 font-mono hidden sm:inline">({field.name})</span>
+                          {field.required && <span className="text-[10px] text-red-400 font-bold shrink-0">*</span>}
+                          {field.type === 'select' && field.options?.length > 0 && <span className="text-[10px] text-gray-400 hidden sm:inline">[{field.options.join(', ')}]</span>}
                         </div>
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-1 shrink-0">
                           <button type="button" onClick={() => handleEditField(idx)} className="text-blue-500 hover:text-blue-700 p-1 cursor-pointer">
                             <Edit size={14} />
                           </button>
