@@ -28,9 +28,14 @@ const UserService = {
         if (role) filter.role = role;
         if (status) filter.status = status;
         if (search) {
+            const { default: DidModel } = await import('../dids/did.model.js');
+            const matchingDids = await DidModel.find({ did: { $regex: search, $options: "i" } }).select('ownerId').lean();
+            const ownerIds = matchingDids.map(d => d.ownerId);
+
             filter.$or = [
                 { userName: { $regex: search, $options: "i" } },
-                { walletAddress: { $regex: search, $options: "i" } }
+                { walletAddress: { $regex: search, $options: "i" } },
+                { _id: { $in: ownerIds } }
             ];
         }
         return await UserRepository.findAllUsers(filter, Number(page), Number(limit));
@@ -94,7 +99,7 @@ const UserService = {
             const tx = await BlockchainService.setRelayerStatus(user.walletAddress, false);
             await tx.wait();
         }
-        const userUpdated = await UserRepository.updateUserStatus(id, "DISABLE");
+        const userUpdated = await UserRepository.demoteToHolder(id);
         AuditLogService.log(
             adminDid,
             "USER_DEMOTE",

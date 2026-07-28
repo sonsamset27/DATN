@@ -3,6 +3,7 @@ import AppError from "../../shared/errors/AppError.js";
 import ErrorCodes from "../../shared/errors/errorCodes.js";
 import DidService from "../dids/did.service.js";
 import AuditLogService from "../auditLog/auditLog.service.js";
+import User from "../users/user.model.js";
 
 const CredentialTemplateService = {
     createCredentialTemplate: async (templateData, user) => {
@@ -27,7 +28,19 @@ const CredentialTemplateService = {
         const { search, page = 1, limit = 20 } = query;
         const filter = {};
         if (search) {
-            filter.name = { $regex: search, $options: "i" };
+            const users = await User.find({
+                $or: [
+                    { userName: { $regex: search, $options: "i" } },
+                    { organizationName: { $regex: search, $options: "i" } },
+                    { organizationCode: { $regex: search, $options: "i" } }
+                ]
+            }).select('_id');
+            const userIds = users.map(u => u._id);
+            
+            filter.$or = [
+                { name: { $regex: search, $options: "i" } },
+                { issuerId: { $in: userIds } }
+            ];
         }
         return await CredentialTemplateRepository.getAllCredentialTemplates(filter, Number(page), Number(limit));
     },

@@ -13,6 +13,18 @@ const UserRepositpry = {
             User.find(filter).skip(skip).limit(limit).lean(),
             User.countDocuments(filter)
         ]);
+
+        if (data.length > 0) {
+            const { default: DidModel } = await import('../dids/did.model.js');
+            const userIds = data.map(u => u._id);
+            const dids = await DidModel.find({ ownerId: { $in: userIds } }).lean();
+            const didMap = {};
+            dids.forEach(d => { didMap[d.ownerId.toString()] = d.did; });
+            data.forEach(u => {
+                u.did = didMap[u._id.toString()];
+            });
+        }
+
         return { data, total, page, limit };
     },
     findUserByWalletAddress: async (walletAddress) => {
@@ -29,6 +41,9 @@ const UserRepositpry = {
     },
     promoteToIssuer: async (id, organizationName, organizationCode) => {
         return await User.findOneAndUpdate({ _id: id }, { role: "ISSUER", organizationName, organizationCode }, { returnDocument: 'after' });
+    },
+    demoteToHolder: async (id) => {
+        return await User.findOneAndUpdate({ _id: id }, { role: "HOLDER", organizationName: "", organizationCode: "" }, { returnDocument: 'after' });
     }
 }
 
