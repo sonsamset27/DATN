@@ -173,21 +173,26 @@ const CredentialService = {
         };
     },
 
-    getOwnCredentials: async (user) => {
+    getOwnCredentials: async (user, query = {}) => {
         const holderDid = await DidService.getDidByAddress(user.walletAddress);
         if (!holderDid) {
             throw AppError.notFound(ErrorCodes.DID_001, "Holder DID not found");
         }
 
-        const credentials = await CredentialRepository.getCredentialsByHolderDid(holderDid.did);
-        if (!credentials || credentials.length === 0) {
-            return [];
+        const { status, templateId, page = 1, limit = 20 } = query;
+        const filter = {};
+        if (status) filter.status = status;
+        if (templateId) filter.credentialTemplateId = templateId;
+
+        const result = await CredentialRepository.getCredentialsByHolderDid(holderDid.did, filter, Number(page), Number(limit));
+        if (!result.data || result.data.length === 0) {
+            return { total: 0, list: [], page: Number(page), limit: Number(limit) };
         }
 
-        const templateIds = credentials.map((c) => c.credentialTemplateId);
+        const templateIds = result.data.map((c) => c.credentialTemplateId);
         const templateMap = await batchLoadTemplates(templateIds);
 
-        return credentials.map((cred) => {
+        const list = result.data.map((cred) => {
             const tmpl = templateMap.get(String(cred.credentialTemplateId));
             return {
                 id: cred._id,
@@ -203,23 +208,36 @@ const CredentialService = {
                 description: tmpl?.description || "",
             };
         });
+
+        return {
+            total: result.total,
+            list: list,
+            page: result.page,
+            limit: result.limit,
+        };
     },
 
-    getCredentialIssueByIssuer: async (user) => {
+    getCredentialIssueByIssuer: async (user, query = {}) => {
         const issuerDid = await DidService.getDidByAddress(user.walletAddress);
         if (!issuerDid) {
             throw AppError.notFound(ErrorCodes.DID_001, "Issuer DID not found");
         }
 
-        const credentials = await CredentialRepository.getCredentialsByIssuerDid(issuerDid.did);
-        if (!credentials || credentials.length === 0) {
-            return { total: 0, list: [] };
+        const { status, templateId, holderDid, page = 1, limit = 20 } = query;
+        const filter = {};
+        if (status) filter.status = status;
+        if (templateId) filter.credentialTemplateId = templateId;
+        if (holderDid) filter.holderDid = holderDid;
+
+        const result = await CredentialRepository.getCredentialsByIssuerDid(issuerDid.did, filter, Number(page), Number(limit));
+        if (!result.data || result.data.length === 0) {
+            return { total: 0, list: [], page: Number(page), limit: Number(limit) };
         }
 
-        const templateIds = credentials.map((c) => c.credentialTemplateId);
+        const templateIds = result.data.map((c) => c.credentialTemplateId);
         const templateMap = await batchLoadTemplates(templateIds);
 
-        const formattedList = credentials.map((cred) => {
+        const list = result.data.map((cred) => {
             const tmpl = templateMap.get(String(cred.credentialTemplateId));
             return {
                 id: cred._id,
@@ -236,8 +254,10 @@ const CredentialService = {
         });
 
         return {
-            total: formattedList.length,
-            list: formattedList,
+            total: result.total,
+            list: list,
+            page: result.page,
+            limit: result.limit,
         };
     },
 

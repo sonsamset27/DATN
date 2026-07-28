@@ -156,10 +156,33 @@ CredentialRoute.post("/verify", AuthMiddleware.Authentication, AuthMiddleware.Au
  * /v1/credentials/owner:
  *   get:
  *     summary: Lấy danh sách chứng chỉ của holder hiện tại
- *     description: Trả về tất cả chứng chỉ mà người dùng đang đăng nhập là holder. Tối ưu N+1 với batch load templates.
+ *     description: Trả về tất cả chứng chỉ mà người dùng đang đăng nhập là holder (có phân trang và filter).
  *     tags: [Credentials]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Trang hiện tại
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *         description: Số lượng trên mỗi trang
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *         description: Lọc theo trạng thái (ACTIVE, REVOKED, EXPIRED)
+ *       - in: query
+ *         name: templateId
+ *         schema:
+ *           type: string
+ *         description: Lọc theo ID mẫu chứng chỉ
  *     responses:
  *       200:
  *         description: Danh sách chứng chỉ
@@ -174,6 +197,12 @@ CredentialRoute.post("/verify", AuthMiddleware.Authentication, AuthMiddleware.Au
  *                   type: array
  *                   items:
  *                     $ref: '#/components/schemas/CredentialSummary'
+ *                 total:
+ *                   type: integer
+ *                 page:
+ *                   type: integer
+ *                 limit:
+ *                   type: integer
  *       401:
  *         $ref: '#/components/responses/Unauthorized'
  *       404:
@@ -195,10 +224,38 @@ CredentialRoute.get("/owner", AuthMiddleware.Authentication, AuthMiddleware.Auth
  * /v1/credentials/issued:
  *   get:
  *     summary: Lấy danh sách chứng chỉ đã cấp bởi issuer hiện tại
- *     description: ADMIN hoặc ISSUER. Trả về danh sách chứng chỉ mà người dùng đang đăng nhập đã cấp. Tối ưu N+1 với batch load templates.
+ *     description: ADMIN hoặc ISSUER. Trả về danh sách chứng chỉ mà người dùng đang đăng nhập đã cấp (có phân trang và filter).
  *     tags: [Credentials]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Trang hiện tại
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *         description: Số lượng trên mỗi trang
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *         description: Lọc theo trạng thái (ACTIVE, REVOKED, EXPIRED)
+ *       - in: query
+ *         name: templateId
+ *         schema:
+ *           type: string
+ *         description: Lọc theo ID mẫu chứng chỉ
+ *       - in: query
+ *         name: holderDid
+ *         schema:
+ *           type: string
+ *         description: Lọc theo DID của holder
  *     responses:
  *       200:
  *         description: Danh sách chứng chỉ đã cấp
@@ -210,14 +267,15 @@ CredentialRoute.get("/owner", AuthMiddleware.Authentication, AuthMiddleware.Auth
  *                 message:
  *                   type: string
  *                 data:
- *                   type: object
- *                   properties:
- *                     total:
- *                       type: integer
- *                     list:
- *                       type: array
- *                       items:
- *                         $ref: '#/components/schemas/CredentialIssuerView'
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/CredentialIssuerView'
+ *                 total:
+ *                   type: integer
+ *                 page:
+ *                   type: integer
+ *                 limit:
+ *                   type: integer
  *       401:
  *         $ref: '#/components/responses/Unauthorized'
  *       403:

@@ -21,12 +21,9 @@ const AuditLogController = {
             return res.status(HttpStatus.OK).json({
                 message: "Audit logs fetched successfully",
                 data: result.data,
-                pagination: {
-                    total: result.total,
-                    page: result.page,
-                    limit: result.limit,
-                    totalPages: Math.ceil(result.total / result.limit),
-                },
+                total: result.total,
+                page: result.page,
+                limit: result.limit,
             });
         } catch (error) {
             if (!error instanceof AppError) {
@@ -58,12 +55,9 @@ const AuditLogController = {
             return res.status(HttpStatus.OK).json({
                 message: "Audit logs fetched successfully",
                 data: result.data,
-                pagination: {
-                    total: result.total,
-                    page: result.page,
-                    limit: result.limit,
-                    totalPages: Math.ceil(result.total / result.limit),
-                },
+                total: result.total,
+                page: result.page,
+                limit: result.limit,
             });
         } catch (error) {
             if (!error instanceof AppError) {

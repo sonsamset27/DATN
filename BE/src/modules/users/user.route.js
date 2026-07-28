@@ -18,10 +18,38 @@ const UserRoute = Router();
  * /v1/users:
  *   get:
  *     summary: Lấy danh sách tất cả người dùng
- *     description: Chỉ ADMIN được phép. Trả về toàn bộ danh sách user trong hệ thống.
+ *     description: Chỉ ADMIN được phép. Trả về toàn bộ danh sách user trong hệ thống (có phân trang và filter).
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Trang hiện tại
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *         description: Số lượng trên mỗi trang
+ *       - in: query
+ *         name: role
+ *         schema:
+ *           type: string
+ *         description: Lọc theo vai trò (ADMIN, ISSUER, HOLDER)
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *         description: Lọc theo trạng thái (ACTIVE, DISABLE)
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Tìm kiếm theo tên hoặc địa chỉ ví
  *     responses:
  *       200:
  *         description: Danh sách users
@@ -36,6 +64,12 @@ const UserRoute = Router();
  *                   type: array
  *                   items:
  *                     $ref: '#/components/schemas/User'
+ *                 total:
+ *                   type: integer
+ *                 page:
+ *                   type: integer
+ *                 limit:
+ *                   type: integer
  *       401:
  *         $ref: '#/components/responses/Unauthorized'
  *       403:

@@ -7,8 +7,13 @@ const UserRepositpry = {
     updateUserName: async (id, userName) => {
         return await User.findOneAndUpdate({ _id: id }, { userName }, { returnDocument: 'after' });
     },
-    findAllUsers: async () => {
-        return await User.find();
+    findAllUsers: async (filter = {}, page = 1, limit = 20) => {
+        const skip = (page - 1) * limit;
+        const [data, total] = await Promise.all([
+            User.find(filter).skip(skip).limit(limit).lean(),
+            User.countDocuments(filter)
+        ]);
+        return { data, total, page, limit };
     },
     findUserByWalletAddress: async (walletAddress) => {
         return await User.findOne({ walletAddress });

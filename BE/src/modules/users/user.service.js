@@ -22,9 +22,18 @@ const UserService = {
         return await UserRepository.updateUserName(id, userName);
     },
 
-    findAllUsers: async () => {
-        const users = await UserRepository.findAllUsers();
-        return users || [];
+    findAllUsers: async (query = {}) => {
+        const { role, status, search, page = 1, limit = 20 } = query;
+        const filter = {};
+        if (role) filter.role = role;
+        if (status) filter.status = status;
+        if (search) {
+            filter.$or = [
+                { userName: { $regex: search, $options: "i" } },
+                { walletAddress: { $regex: search, $options: "i" } }
+            ];
+        }
+        return await UserRepository.findAllUsers(filter, Number(page), Number(limit));
     },
 
     updateUserRole: async (id, role) => {

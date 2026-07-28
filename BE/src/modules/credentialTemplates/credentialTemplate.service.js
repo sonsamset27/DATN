@@ -23,9 +23,13 @@ const CredentialTemplateService = {
         return newTemplate;
     },
 
-    getAllCredentialTemplates: async () => {
-        const templates = await CredentialTemplateRepository.getAllCredentialTemplates();
-        return templates || [];
+    getAllCredentialTemplates: async (query = {}) => {
+        const { search, page = 1, limit = 20 } = query;
+        const filter = {};
+        if (search) {
+            filter.name = { $regex: search, $options: "i" };
+        }
+        return await CredentialTemplateRepository.getAllCredentialTemplates(filter, Number(page), Number(limit));
     },
 
     getCredentialTemplateById: async (id) => {
@@ -36,9 +40,13 @@ const CredentialTemplateService = {
         return template;
     },
 
-    getCredentialTemplateByIssuerId: async (issuerId) => {
-        const templates = await CredentialTemplateRepository.getCredentialTemplateByIssuerId(issuerId);
-        return templates || [];
+    getCredentialTemplateByIssuerId: async (issuerId, query = {}) => {
+        const { search, page = 1, limit = 20 } = query;
+        const filter = {};
+        if (search) {
+            filter.name = { $regex: search, $options: "i" };
+        }
+        return await CredentialTemplateRepository.getCredentialTemplateByIssuerId(issuerId, filter, Number(page), Number(limit));
     },
 
     updateCredentialTemplate: async (id, templateData, user) => {

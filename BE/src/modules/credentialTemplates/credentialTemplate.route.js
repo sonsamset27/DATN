@@ -56,10 +56,28 @@ CredentialTemplateRoute.post("/", AuthLimitMiddleware.uploadLimiter, AuthMiddlew
  * /v1/credential-templates:
  *   get:
  *     summary: Lấy tất cả mẫu chứng chỉ
- *     description: Chỉ ADMIN. Trả về toàn bộ danh sách templates trong hệ thống.
+ *     description: Chỉ ADMIN. Trả về toàn bộ danh sách templates trong hệ thống (có phân trang và filter).
  *     tags: [CredentialTemplates]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Trang hiện tại
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *         description: Số lượng trên mỗi trang
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Tìm kiếm theo tên mẫu chứng chỉ
  *     responses:
  *       200:
  *         description: Danh sách templates
@@ -74,6 +92,12 @@ CredentialTemplateRoute.post("/", AuthLimitMiddleware.uploadLimiter, AuthMiddlew
  *                   type: array
  *                   items:
  *                     $ref: '#/components/schemas/CredentialTemplate'
+ *                 total:
+ *                   type: integer
+ *                 page:
+ *                   type: integer
+ *                 limit:
+ *                   type: integer
  *       401:
  *         $ref: '#/components/responses/Unauthorized'
  *       403:
@@ -88,7 +112,7 @@ CredentialTemplateRoute.get("/", AuthLimitMiddleware.readLimiter, AuthMiddleware
  * /v1/credential-templates/issuer/{issuerId}:
  *   get:
  *     summary: Lấy templates theo Issuer
- *     description: ADMIN hoặc ISSUER lấy danh sách template của một issuer cụ thể.
+ *     description: ADMIN hoặc ISSUER lấy danh sách template của một issuer cụ thể (có phân trang và filter).
  *     tags: [CredentialTemplates]
  *     security:
  *       - bearerAuth: []
@@ -99,6 +123,23 @@ CredentialTemplateRoute.get("/", AuthLimitMiddleware.readLimiter, AuthMiddleware
  *         schema:
  *           type: string
  *         description: MongoDB ObjectId của issuer (user)
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Trang hiện tại
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *         description: Số lượng trên mỗi trang
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Tìm kiếm theo tên mẫu chứng chỉ
  *     responses:
  *       200:
  *         description: Danh sách templates của issuer
@@ -113,6 +154,12 @@ CredentialTemplateRoute.get("/", AuthLimitMiddleware.readLimiter, AuthMiddleware
  *                   type: array
  *                   items:
  *                     $ref: '#/components/schemas/CredentialTemplate'
+ *                 total:
+ *                   type: integer
+ *                 page:
+ *                   type: integer
+ *                 limit:
+ *                   type: integer
  *       401:
  *         $ref: '#/components/responses/Unauthorized'
  *       403:

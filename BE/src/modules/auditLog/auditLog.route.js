@@ -64,8 +64,12 @@ const AuditLogRoute = Router();
  *                   type: array
  *                   items:
  *                     $ref: '#/components/schemas/AuditLog'
- *                 pagination:
- *                   $ref: '#/components/schemas/Pagination'
+ *                 total:
+ *                   type: integer
+ *                 page:
+ *                   type: integer
+ *                 limit:
+ *                   type: integer
  *       401:
  *         $ref: '#/components/responses/Unauthorized'
  *       403:
@@ -120,8 +124,12 @@ AuditLogRoute.get(
  *                   type: array
  *                   items:
  *                     $ref: '#/components/schemas/AuditLog'
- *                 pagination:
- *                   $ref: '#/components/schemas/Pagination'
+ *                 total:
+ *                   type: integer
+ *                 page:
+ *                   type: integer
+ *                 limit:
+ *                   type: integer
  *       401:
  *         $ref: '#/components/responses/Unauthorized'
  *       403:

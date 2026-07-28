@@ -79,10 +79,13 @@ const UserController = {
 
     findAllUsers: async (req, res) => {
         try {
-            const users = await UserService.findAllUsers();
+            const result = await UserService.findAllUsers(req.query);
             return res.status(HttpStatus.OK).json({
                 message: "Users found successfully",
-                data: users,
+                data: result.data,
+                total: result.total,
+                page: result.page,
+                limit: result.limit,
             });
         } catch (error) {
             if (!error instanceof AppError) {

@@ -29,10 +29,13 @@ const CredentialTemplateController = {
 
     getAllCredentialTemplates: async (req, res) => {
         try {
-            const templates = await CredentialTemplateService.getAllCredentialTemplates();
+            const result = await CredentialTemplateService.getAllCredentialTemplates(req.query);
             return res.status(HttpStatus.OK).json({
-                message: "Credential templates fetched successfully",
-                data: templates,
+                message: "Credential templates found successfully",
+                data: result.data,
+                total: result.total,
+                page: result.page,
+                limit: result.limit,
             });
         } catch (error) {
             if (!error instanceof AppError) {
@@ -77,10 +80,13 @@ const CredentialTemplateController = {
 
     getCredentialTemplateByIssuerId: async (req, res) => {
         try {
-            const templates = await CredentialTemplateService.getCredentialTemplateByIssuerId(req.params.issuerId);
+            const result = await CredentialTemplateService.getCredentialTemplateByIssuerId(req.params.issuerId, req.query);
             return res.status(HttpStatus.OK).json({
-                message: "Credential templates fetched successfully",
-                data: templates,
+                message: "Credential templates found successfully",
+                data: result.data,
+                total: result.total,
+                page: result.page,
+                limit: result.limit,
             });
         } catch (error) {
             if (!error instanceof AppError) {

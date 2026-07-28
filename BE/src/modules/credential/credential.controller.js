@@ -55,10 +55,13 @@ const CredentialController = {
 
     getOwnCredentials: async (req, res) => {
         try {
-            const credentials = await CredentialService.getOwnCredentials(req.user);
+            const result = await CredentialService.getOwnCredentials(req.user, req.query);
             return res.status(HttpStatus.OK).json({
-                message: "Credentials fetched successfully",
-                data: credentials,
+                message: "Credentials found successfully",
+                data: result.list,
+                total: result.total,
+                page: result.page,
+                limit: result.limit,
             });
         } catch (error) {
             if (!error instanceof AppError) {
@@ -80,10 +83,13 @@ const CredentialController = {
 
     getCredentialIssueByIssuer: async (req, res) => {
         try {
-            const credentials = await CredentialService.getCredentialIssueByIssuer(req.user);
+            const result = await CredentialService.getCredentialIssueByIssuer(req.user, req.query);
             return res.status(HttpStatus.OK).json({
-                message: "Credentials fetched successfully",
-                data: credentials,
+                message: "Credentials found successfully",
+                data: result.list,
+                total: result.total,
+                page: result.page,
+                limit: result.limit,
             });
         } catch (error) {
             if (!error instanceof AppError) {
