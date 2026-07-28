@@ -12,14 +12,11 @@ export const useLoginFlow = () => {
   
   const [isSigning, setIsSigning] = useState(false);
 
-  // KHÔNG dùng useEffect auto-trigger nữa.
-  // Lý do:
-  // 1. Browser/MetaMask block popup không từ user gesture trực tiếp → sign bị fail.
-  // 2. Khi reload: wagmi restore ví connected nhưng isAuthenticated=false
-  //    → auto-trigger gọi sign ngay lập tức mà user không mong muốn.
-  // 3. Khi logout: logout() chỉ clear store, wagmi vẫn connected
-  //    → condition isConnected && !isAuthenticated = true → auto-trigger lại.
-  // Giải pháp: sign chỉ được gọi khi user CHỦ ĐỘNG click nút.
+  // KHÔNG dùng useEffect auto-trigger:
+  // - Browser/MetaMask block popup không từ user gesture trực tiếp → sign bị fail.
+  // - Khi reload: wagmi restore ví connected + isAuthenticated=false → auto-trigger không mong muốn.
+  // - Khi logout: wagmi vẫn connected → condition thoả → trigger lại.
+  // → sign chỉ được gọi khi user CHỦ ĐỘNG click nút.
 
   const handleSiweLogin = async () => {
     if (!address || !isConnected) {
@@ -29,31 +26,34 @@ export const useLoginFlow = () => {
     try {
       setIsSigning(true);
       
-      // 1. Lấy challenge từ BE
+      // 1. Lấy challenge
       toast.loading('Đang lấy challenge từ server...', { id: 'siwe' });
       const challengeRes = await authApi.getChallenge(address);
       const { nonce } = challengeRes;
-      
-      if (!nonce) {
-        throw new Error('Không nhận được nonce từ server. Vui lòng thử lại.');
-      }
+      if (!nonce) throw new Error('Không nhận được nonce từ server. Vui lòng thử lại.');
 
-      // 2. Mở MetaMask để ký — đây là bước user tương tác trực tiếp
-      //    nên popup sẽ hiển thị bình thường
+      // 2. Ký — popup MetaMask từ user gesture nên sẽ hiển thị bình thường
       toast.loading('Vui lòng xác nhận chữ ký trên ví MetaMask...', { id: 'siwe' });
       const signature = await signMessageAsync({ message: nonce });
       
-      // 3. Gửi chữ ký lên server
+      // 3. Gửi chữ ký lên server để lấy token
       toast.loading('Đang xác thực với server...', { id: 'siwe' });
       const loginRes = await authApi.loginWithSignature(address, signature);
       
-      // 4. Lưu vào store
-      login(loginRes.user, loginRes.accessToken);
+      // 4. Lưu token tạm để getMe có thể gọi được (axios interceptor đọc từ localStorage)
+      localStorage.setItem('accessToken', loginRes.accessToken);
+      
+      // 5. Fetch fresh user data từ DB để có userName mới nhất (tránh dùng snapshot trong JWT)
+      const meRes = await authApi.getMe();
+      const freshUser = meRes.data;
+      
+      // 6. Lưu vào store với fresh data
+      login(freshUser, loginRes.accessToken);
       
       toast.success('Đăng nhập thành công!', { id: 'siwe' });
     } catch (error) {
       console.error('Login failed:', error);
-      // Nếu user tự reject signing thì không disconnect, chỉ thông báo
+      localStorage.removeItem('accessToken');
       if (error?.name === 'UserRejectedRequestError' || error?.code === 4001) {
         toast.error('Bạn đã từ chối ký xác nhận. Hãy thử lại.', { id: 'siwe' });
       } else {
