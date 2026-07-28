@@ -10,7 +10,7 @@ export default function UsersListPage() {
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const limit = 10;
-  
+
   const [promoteModal, setPromoteModal] = useState({ open: false, userId: null });
   const [orgForm, setOrgForm] = useState({ organizationName: '', organizationCode: '' });
   const [demoteConfirm, setDemoteConfirm] = useState(null);
@@ -132,11 +132,10 @@ export default function UsersListPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold ${
-                        u.role === 'ADMIN' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
-                        u.role === 'ISSUER' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' :
-                        'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                      }`}>
+                      <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold ${u.role === 'ADMIN' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
+                          u.role === 'ISSUER' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' :
+                            'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                        }`}>
                         {u.role}
                       </span>
                     </td>
@@ -227,7 +226,7 @@ export default function UsersListPage() {
                     value={orgForm.organizationName}
                     onChange={(e) => setOrgForm({ ...orgForm, organizationName: e.target.value })}
                     className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-transparent focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition-all"
-                    placeholder="VD: Trường Đại học Bách Khoa"
+                    placeholder="VD: Trường Đại học Xây Dựng Hà Nội"
                     required
                   />
                 </div>
@@ -238,7 +237,7 @@ export default function UsersListPage() {
                     value={orgForm.organizationCode}
                     onChange={(e) => setOrgForm({ ...orgForm, organizationCode: e.target.value })}
                     className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-transparent focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition-all uppercase"
-                    placeholder="VD: HUST"
+                    placeholder="VD: HUCE"
                     required
                   />
                 </div>
