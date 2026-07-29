@@ -2,10 +2,16 @@ import { Outlet, Navigate } from 'react-router-dom';
 import { useAuthStore } from '../../features/auth/store/auth.store';
 
 export default function AuthLayout() {
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, logout } = useAuthStore();
+  const token = localStorage.getItem('accessToken');
 
-  if (isAuthenticated) {
+  if (isAuthenticated && token) {
     return <Navigate to="/dashboard" replace />;
+  }
+
+  if (isAuthenticated && !token) {
+    // Sync state if token was manually removed
+    setTimeout(() => logout(), 0);
   }
 
   return (

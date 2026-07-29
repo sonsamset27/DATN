@@ -1,6 +1,7 @@
 import { Router } from "express";
 import CredentialController from "./credential.controller.js";
 import AuthMiddleware from "../../shared/middlewares/auth.middleware.js";
+import AuthLimitMiddleware from "../../shared/middlewares/authLimit.middleware.js";
 import CredentialValidator from "./credential.validator.js";
 
 const CredentialRoute = Router();
@@ -149,7 +150,7 @@ CredentialRoute.post("/issue", AuthMiddleware.Authentication, AuthMiddleware.Aut
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-CredentialRoute.post("/verify", AuthMiddleware.Authentication, AuthMiddleware.Authorization("ADMIN", "ISSUER", "HOLDER"), CredentialValidator.verifyCredential, CredentialController.verifyCredential);
+CredentialRoute.post("/verify", AuthLimitMiddleware.readLimiter, CredentialValidator.verifyCredential, CredentialController.verifyCredential);
 
 /**
  * @swagger

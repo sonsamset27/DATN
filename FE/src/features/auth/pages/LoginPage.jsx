@@ -70,6 +70,15 @@ export default function LoginPage() {
           </div>
         )}
       </div>
+
+      <div className="pt-6">
+        <button
+          onClick={() => navigate('/')}
+          className="text-sm text-gray-500 hover:text-primary transition-colors hover:underline"
+        >
+          &larr; Trở về trang khách
+        </button>
+      </div>
     </div>
   );
 }

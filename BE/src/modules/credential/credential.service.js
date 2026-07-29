@@ -161,13 +161,7 @@ const CredentialService = {
             templateName = template?.name || null;
         } catch { }
 
-        AuditLogService.log(
-            dataIpfs.holderDid,
-            "VERIFY",
-            credential.credentialId,
-            "CREDENTIAL",
-            { holderDid: dataIpfs.holderDid, templateId: dataIpfs.credentialTemplateId }
-        );
+        // AuditLog for VERIFY removed to prevent DB spam from public guest verifications.
 
         return {
             status: finalStatus,

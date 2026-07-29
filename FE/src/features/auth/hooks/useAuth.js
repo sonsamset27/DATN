@@ -9,14 +9,8 @@ export const useLoginFlow = () => {
   const { disconnect } = useDisconnect();
   const { signMessageAsync } = useSignMessage();
   const { login, isAuthenticated } = useAuthStore();
-  
-  const [isSigning, setIsSigning] = useState(false);
 
-  // KHÔNG dùng useEffect auto-trigger:
-  // - Browser/MetaMask block popup không từ user gesture trực tiếp → sign bị fail.
-  // - Khi reload: wagmi restore ví connected + isAuthenticated=false → auto-trigger không mong muốn.
-  // - Khi logout: wagmi vẫn connected → condition thoả → trigger lại.
-  // → sign chỉ được gọi khi user CHỦ ĐỘNG click nút.
+  const [isSigning, setIsSigning] = useState(false);
 
   const handleSiweLogin = async () => {
     if (!address || !isConnected) {
@@ -25,7 +19,7 @@ export const useLoginFlow = () => {
     }
     try {
       setIsSigning(true);
-      
+
       // 1. Lấy challenge
       toast.loading('Đang lấy challenge từ server...', { id: 'siwe' });
       const challengeRes = await authApi.getChallenge(address);
@@ -33,23 +27,23 @@ export const useLoginFlow = () => {
       if (!nonce) throw new Error('Không nhận được nonce từ server. Vui lòng thử lại.');
 
       // 2. Ký — popup MetaMask từ user gesture nên sẽ hiển thị bình thường
-      toast.loading('Vui lòng xác nhận chữ ký trên ví MetaMask...', { id: 'siwe' });
+      toast.loading('Vui lòng xác nhận chữ ký trên ví...', { id: 'siwe' });
       const signature = await signMessageAsync({ message: nonce });
-      
+
       // 3. Gửi chữ ký lên server để lấy token
       toast.loading('Đang xác thực với server...', { id: 'siwe' });
       const loginRes = await authApi.loginWithSignature(address, signature);
-      
+
       // 4. Lưu token tạm để getMe có thể gọi được (axios interceptor đọc từ localStorage)
       localStorage.setItem('accessToken', loginRes.accessToken);
-      
+
       // 5. Fetch fresh user data từ DB để có userName mới nhất (tránh dùng snapshot trong JWT)
       const meRes = await authApi.getMe();
       const freshUser = meRes.data;
-      
+
       // 6. Lưu vào store với fresh data
       login(freshUser, loginRes.accessToken);
-      
+
       toast.success('Đăng nhập thành công!', { id: 'siwe' });
     } catch (error) {
       console.error('Login failed:', error);

@@ -15,6 +15,7 @@ import VerifyCredentialPage from '../features/credentials/pages/VerifyCredential
 import IssuedCredentialsPage from '../features/credentials/pages/IssuedCredentialsPage';
 import IssueCredentialPage from '../features/credentials/pages/IssueCredentialPage';
 import AuditLogsPage from '../features/audit-logs/pages/AuditLogsPage';
+import GuestDashboardPage from '../features/guest/pages/GuestDashboardPage';
 
 // Placeholder Pages
 
@@ -24,9 +25,12 @@ export const router = createBrowserRouter([
     element: <App />,
     children: [
       {
+        index: true,
+        element: <GuestDashboardPage />
+      },
+      {
         element: <MainLayout />,
         children: [
-          { index: true, element: <Navigate to="/dashboard" replace /> },
           { path: 'dashboard', element: <DashboardPage /> },
           { path: 'users', element: <UsersListPage /> },
           { path: 'my-did', element: <MyDIDPage /> },

@@ -12,6 +12,7 @@ export default function MainLayout() {
   const { disconnect } = useDisconnect();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const token = localStorage.getItem('accessToken');
 
   const handleLogout = () => {
     queryClient.clear();  // xoá toàn bộ cache React Query (DID, credentials, users, ...)
@@ -19,8 +20,12 @@ export default function MainLayout() {
     disconnect();         // disconnect wagmi ví để tránh auto-sign khi quay lại /login
   };
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+  if (!isAuthenticated || !token) {
+    if (isAuthenticated && !token) {
+      // Sync state if token was manually removed
+      setTimeout(() => logout(), 0);
+    }
+    return <Navigate to="/" replace />;
   }
 
   const avatarSeed = user?.walletAddress || user?.userName || 'default';

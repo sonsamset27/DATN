@@ -1,6 +1,7 @@
 import axios from "axios";
 import { API_BASE_URL } from "./constants";
 import toast from "react-hot-toast";
+import { useAuthStore } from "../features/auth/store/auth.store";
 
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
@@ -37,8 +38,8 @@ axiosInstance.interceptors.response.use(
     
     // Auto logout if 401
     if (error.response?.status === 401 && !window.location.pathname.includes('/login')) {
-       localStorage.removeItem("accessToken");
-       window.location.href = "/login";
+       useAuthStore.getState().logout();
+       window.location.href = "/";
     }
 
     return Promise.reject(error.response?.data || error);
