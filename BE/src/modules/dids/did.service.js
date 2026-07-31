@@ -101,6 +101,22 @@ const DidService = {
         return didDb;
     },
 
+    // Trả về null nếu không tìm thấy — dùng khi DID chưa có là trạng thái bình thường (e.g. user mới)
+    findDidByAddress: async (address) => {
+        const didDb = await DidRepository.getDidByAddress(address);
+        if (!didDb) return null;
+
+        const didBlockchain = await BlockchainService.getDID(didDb.did);
+        if (!didBlockchain) return null;
+
+        if (didBlockchain[1].toLowerCase() !== address.toLowerCase()) {
+            throw AppError.unprocessable(ErrorCodes.DID_003, "DID owner does not match");
+        }
+
+        return didDb;
+    },
+
+    // Throw lỗi nếu không tìm thấy — dùng khi DID bắt buộc phải tồn tại
     getDidByAddress: async (address) => {
         const didDb = await DidRepository.getDidByAddress(address);
         if (!didDb) {

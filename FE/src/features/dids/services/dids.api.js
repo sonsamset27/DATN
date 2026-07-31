@@ -10,6 +10,7 @@ export const didsApi = {
   },
 
   getMyDid: async () => {
-    return await axiosInstance.get('/dids/me');
+    // hideErrorToast: true để tránh toast lỗi "DID not found" khi user mới chưa có DID (trạng thái bình thường)
+    return await axiosInstance.get('/dids/me', { hideErrorToast: true });
   }
 };

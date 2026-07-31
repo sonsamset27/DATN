@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAccount, useSignMessage, useDisconnect } from 'wagmi';
 import { authApi } from '../services/auth.api';
 import { useAuthStore } from '../store/auth.store';
@@ -11,6 +11,16 @@ export const useLoginFlow = () => {
   const { login, isAuthenticated } = useAuthStore();
 
   const [isSigning, setIsSigning] = useState(false);
+  const [prefetchedNonce, setPrefetchedNonce] = useState(null);
+
+  // Prefetch nonce để tránh lỗi MetaMask không bật popup do request API quá lâu (mất user gesture)
+  useEffect(() => {
+    if (isConnected && address) {
+      authApi.getChallenge(address)
+        .then(res => setPrefetchedNonce(res.nonce))
+        .catch(err => console.error("Lỗi khi prefetch challenge:", err));
+    }
+  }, [isConnected, address]);
 
   const handleSiweLogin = async () => {
     if (!address || !isConnected) {
@@ -20,15 +30,19 @@ export const useLoginFlow = () => {
     try {
       setIsSigning(true);
 
-      // 1. Lấy challenge
-      toast.loading('Đang lấy challenge từ server...', { id: 'siwe' });
-      const challengeRes = await authApi.getChallenge(address);
-      const { nonce } = challengeRes;
-      if (!nonce) throw new Error('Không nhận được nonce từ server. Vui lòng thử lại.');
+      // Sử dụng nonce đã prefetch, nếu chưa có thì fetch lại
+      let nonceToSign = prefetchedNonce;
+      if (!nonceToSign) {
+        toast.loading('Đang lấy challenge từ server...', { id: 'siwe' });
+        const challengeRes = await authApi.getChallenge(address);
+        nonceToSign = challengeRes.nonce;
+      }
+      
+      if (!nonceToSign) throw new Error('Không nhận được nonce từ server. Vui lòng thử lại.');
 
-      // 2. Ký — popup MetaMask từ user gesture nên sẽ hiển thị bình thường
+      // 2. Ký — popup MetaMask sẽ hiển thị vì không bị delay bởi await fetch quá lâu
       toast.loading('Vui lòng xác nhận chữ ký trên ví...', { id: 'siwe' });
-      const signature = await signMessageAsync({ message: nonce });
+      const signature = await signMessageAsync({ message: nonceToSign });
 
       // 3. Gửi chữ ký lên server để lấy token
       toast.loading('Đang xác thực với server...', { id: 'siwe' });

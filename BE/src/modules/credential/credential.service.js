@@ -188,9 +188,9 @@ const CredentialService = {
     },
 
     getOwnCredentials: async (user, query = {}) => {
-        const holderDid = await DidService.getDidByAddress(user.walletAddress);
+        const holderDid = await DidService.findDidByAddress(user.walletAddress);
         if (!holderDid) {
-            throw AppError.notFound(ErrorCodes.DID_001, "Holder DID not found");
+            return { total: 0, list: [], page: 1, limit: 20 };
         }
 
         const { status, templateId, page = 1, limit = 20 } = query;
@@ -231,9 +231,9 @@ const CredentialService = {
     },
 
     getCredentialIssueByIssuer: async (user, query = {}) => {
-        const issuerDid = await DidService.getDidByAddress(user.walletAddress);
+        const issuerDid = await DidService.findDidByAddress(user.walletAddress);
         if (!issuerDid) {
-            throw AppError.notFound(ErrorCodes.DID_001, "Issuer DID not found");
+            return { total: 0, list: [], page: 1, limit: 20 };
         }
 
         const { status, templateId, holderDid, page = 1, limit = 20 } = query;
