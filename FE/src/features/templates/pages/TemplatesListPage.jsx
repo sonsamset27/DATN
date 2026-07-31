@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { templatesApi } from '../services/templates.api';
 import { useAuthStore } from '../../auth/store/auth.store';
 import toast from 'react-hot-toast';
-import { FileBadge, Plus, Trash2, Edit, X, Eye, Loader2, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { FileBadge, Plus, Trash2, Edit, X, Loader2, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function TemplatesListPage() {

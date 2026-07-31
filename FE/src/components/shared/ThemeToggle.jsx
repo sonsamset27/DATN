@@ -1,4 +1,3 @@
-import { Outlet } from 'react-router-dom';
 import { useTheme } from '../../hooks/useTheme';
 import { Moon, Sun } from 'lucide-react';
 

@@ -1,7 +1,7 @@
 import { Outlet, Navigate, Link, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../features/auth/store/auth.store';
 import ThemeToggle from '../shared/ThemeToggle';
-import { LogOut, Home, User, ShieldCheck, Users, Fingerprint, FileBadge, Award, Activity, Menu, X } from 'lucide-react';
+import { LogOut, Home, ShieldCheck, Users, Fingerprint, FileBadge, Award, Activity, Menu, X } from 'lucide-react';
 import { useDisconnect } from 'wagmi';
 import { queryClient } from '../../lib/queryClient';
 import logo from '../../assets/images/logo_datn.png';

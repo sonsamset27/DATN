@@ -1,4 +1,4 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { createBrowserRouter } from 'react-router-dom';
 import App from '../App';
 
 // Layouts
@@ -40,7 +40,6 @@ export const router = createBrowserRouter([
           { path: 'issue-credential', element: <IssueCredentialPage /> },
           { path: 'audit-logs', element: <AuditLogsPage /> },
           { path: 'verify', element: <VerifyCredentialPage /> },
-          // Các route khác sẽ thêm sau (credentials, templates, users, dids)
         ]
       },
       {
