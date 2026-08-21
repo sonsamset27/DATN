@@ -35,7 +35,7 @@ export default function VerifyCredentialPage() {
   useEffect(() => {
     return () => {
       if (scannerRef.current) {
-        scannerRef.current.stop().catch(() => {});
+        scannerRef.current.stop().catch(() => { });
         scannerRef.current = null;
       }
     };
@@ -84,7 +84,7 @@ export default function VerifyCredentialPage() {
             stopScanner(scanner);
             handleVerify(decoded);
           },
-          () => {}
+          () => { }
         ).catch(err => {
           setMode('idle');
           toast.error('Không thể mở camera: ' + (err?.message || err));
@@ -158,7 +158,7 @@ export default function VerifyCredentialPage() {
                   <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent animate-[scan_2s_linear_infinite]" />
                   {/* Corner brackets */}
                   {[['top-2 left-2', 'border-t-2 border-l-2'], ['top-2 right-2', 'border-t-2 border-r-2'],
-                    ['bottom-2 left-2', 'border-b-2 border-l-2'], ['bottom-2 right-2', 'border-b-2 border-r-2']]
+                  ['bottom-2 left-2', 'border-b-2 border-l-2'], ['bottom-2 right-2', 'border-b-2 border-r-2']]
                     .map(([pos, bdr]) => (
                       <div key={pos} className={`absolute ${pos} w-6 h-6 ${bdr} border-primary rounded-sm`} />
                     ))}
@@ -250,7 +250,7 @@ export default function VerifyCredentialPage() {
                   <div>
                     <p className="font-semibold text-sm text-gray-800 dark:text-gray-100">Quét QR bằng Camera</p>
                     <p className="text-[11px] text-gray-400 mt-0.5">
-                      {mobile ? '📷 Camera sau (rear camera)' : '💻 Webcam máy tính'}
+                      {mobile ? 'Camera sau (rear camera)' : 'Webcam máy tính'}
                     </p>
                   </div>
                 </button>
@@ -265,7 +265,7 @@ export default function VerifyCredentialPage() {
                   </div>
                   <div>
                     <p className="font-semibold text-sm text-gray-800 dark:text-gray-100">Tải ảnh QR lên</p>
-                    <p className="text-[11px] text-gray-400 mt-0.5">📁 PNG, JPG, WEBP chứa mã QR</p>
+                    <p className="text-[11px] text-gray-400 mt-0.5">PNG, JPG, WEBP chứa mã QR</p>
                   </div>
                 </button>
               </div>
