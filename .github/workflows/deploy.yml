@@ -29,7 +29,7 @@ jobs:
           cache-dependency-path: FE/package-lock.json
 
       - name: Install FE dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps
         working-directory: ./FE
 
       - name: Lint Frontend (oxlint)
