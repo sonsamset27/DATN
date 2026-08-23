@@ -12,7 +12,11 @@ import AuditLogRouter from "./modules/auditLog/auditLog.route.js";
 import cookieParser from "cookie-parser";
 import cors from "cors"
 
+import dotenv from "dotenv";
+dotenv.config();
+
 const app = express()
+app.set('trust proxy', 1)
 
 
 app.use(express.json({
@@ -21,7 +25,8 @@ app.use(express.json({
 app.use(cookieParser())
 const allowedOrigins = [
     'http://localhost:5173',
-    'http://localhost:5174'
+    'http://localhost:5174',
+    'https://credential.dcsystem.space',
 ];
 
 app.use(cors({
@@ -44,8 +49,10 @@ app.use(helmet())
 // giảm băng thông
 app.use(compression());
 
-// log request
-app.use(morgan("dev"));
+// Thay morgan("dev") bằng:
+const morganFormat = process.env.NODE_ENV === 'production' ? 'combined' : 'dev';
+app.use(morgan(morganFormat));
+
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
