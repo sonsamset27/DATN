@@ -12,7 +12,7 @@ const DidController = {
             });
         } catch (error) {
             if (!(error instanceof AppError)) {
-                console.log("Error at prepareCreateDid: " + error);
+                console.error("Error at prepareCreateDid: ", error);
             }
             if (error instanceof AppError) {
                 return res.status(error.statusCode).json({
@@ -37,7 +37,7 @@ const DidController = {
             });
         } catch (error) {
             if (!(error instanceof AppError)) {
-                console.log("Error at registerDid: " + error);
+                console.error("Error at registerDid: ", error);
             }
             if (error instanceof AppError) {
                 return res.status(error.statusCode).json({
@@ -61,7 +61,7 @@ const DidController = {
             });
         } catch (error) {
             if (!(error instanceof AppError)) {
-                console.log("Error at getDidByUserId: " + error);
+                console.error("Error at getDidByUserId: ", error);
             }
             if (error instanceof AppError) {
                 return res.status(error.statusCode).json({
@@ -86,7 +86,7 @@ const DidController = {
             });
         } catch (error) {
             if (!(error instanceof AppError)) {
-                console.log("Error at getDidByAddress: " + error);
+                console.error("Error at getDidByAddress: ", error);
             }
             if (error instanceof AppError) {
                 return res.status(error.statusCode).json({

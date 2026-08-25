@@ -26,8 +26,8 @@ const AuditLogController = {
                 limit: result.limit,
             });
         } catch (error) {
-            if (!error instanceof AppError) {
-                console.log("Error at getLogs: " + error);
+            if (!(error instanceof AppError)) {
+                console.error("Error at getLogs: ", error);
             }
             if (error instanceof AppError) {
                 return res.status(error.statusCode).json({
@@ -60,8 +60,8 @@ const AuditLogController = {
                 limit: result.limit,
             });
         } catch (error) {
-            if (!error instanceof AppError) {
-                console.log("Error at getLogsByTarget: " + error);
+            if (!(error instanceof AppError)) {
+                console.error("Error at getLogsByTarget: ", error);
             }
             if (error instanceof AppError) {
                 return res.status(error.statusCode).json({

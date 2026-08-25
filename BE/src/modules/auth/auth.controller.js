@@ -10,8 +10,8 @@ const AuthController = {
             const message = await AuthService.generateChallenge(walletAddress);
             return res.status(HttpStatus.OK).json(message);
         } catch (error) {
-            if (!error instanceof AppError) {
-                console.log("Error at generateChallenge: " + error);
+            if (!(error instanceof AppError)) {
+                console.error("Error at generateChallenge: ", error);
             }
             if (error instanceof AppError) {
                 return res.status(error.statusCode).json({
@@ -36,8 +36,8 @@ const AuthController = {
                 user: result.user,
             });
         } catch (error) {
-            if (!error instanceof AppError) {
-                console.log("Error at verifySignature: " + error);
+            if (!(error instanceof AppError)) {
+                console.error("Error at verifySignature: ", error);
             }
             if (error instanceof AppError) {
                 return res.status(error.statusCode).json({

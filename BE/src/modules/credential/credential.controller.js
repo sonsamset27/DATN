@@ -11,8 +11,8 @@ const CredentialController = {
                 data: newCredential,
             });
         } catch (error) {
-            if (!error instanceof AppError) {
-                console.log("Error at issueCredential: " + error);
+            if (!(error instanceof AppError)) {
+                console.error("Error at issueCredential: ", error);
             }
             if (error instanceof AppError) {
                 return res.status(error.statusCode).json({
@@ -36,8 +36,8 @@ const CredentialController = {
                 data: verifiedCredential,
             });
         } catch (error) {
-            if (!error instanceof AppError) {
-                console.log("Error at verifyCredential: " + error);
+            if (!(error instanceof AppError)) {
+                console.error("Error at verifyCredential: ", error);
             }
             if (error instanceof AppError) {
                 return res.status(error.statusCode).json({
@@ -64,8 +64,8 @@ const CredentialController = {
                 limit: result.limit,
             });
         } catch (error) {
-            if (!error instanceof AppError) {
-                console.log("Error at getOwnCredentials: " + error);
+            if (!(error instanceof AppError)) {
+                console.error("Error at getOwnCredentials: ", error);
             }
             if (error instanceof AppError) {
                 return res.status(error.statusCode).json({
@@ -92,8 +92,8 @@ const CredentialController = {
                 limit: result.limit,
             });
         } catch (error) {
-            if (!error instanceof AppError) {
-                console.log("Error at getCredentialIssueByIssuer: " + error);
+            if (!(error instanceof AppError)) {
+                console.error("Error at getCredentialIssueByIssuer: ", error);
             }
             if (error instanceof AppError) {
                 return res.status(error.statusCode).json({
@@ -117,8 +117,8 @@ const CredentialController = {
                 data: credential,
             });
         } catch (error) {
-            if (!error instanceof AppError) {
-                console.log("Error at getCredentialById: " + error);
+            if (!(error instanceof AppError)) {
+                console.error("Error at getCredentialById: ", error);
             }
             if (error instanceof AppError) {
                 return res.status(error.statusCode).json({
@@ -147,8 +147,8 @@ const CredentialController = {
                 data: result,
             });
         } catch (error) {
-            if (!error instanceof AppError) {
-                console.log("Error at reissueAllCredentials: " + error);
+            if (!(error instanceof AppError)) {
+                console.error("Error at reissueAllCredentials: ", error);
             }
             if (error instanceof AppError) {
                 return res.status(error.statusCode).json({
@@ -172,8 +172,8 @@ const CredentialController = {
                 data: stats,
             });
         } catch (error) {
-            if (!error instanceof AppError) {
-                console.log("Error at getCredentialStats: " + error);
+            if (!(error instanceof AppError)) {
+                console.error("Error at getCredentialStats: ", error);
             }
             if (error instanceof AppError) {
                 return res.status(error.statusCode).json({
