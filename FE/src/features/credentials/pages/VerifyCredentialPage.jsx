@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { credentialsApi } from '../services/credentials.api';
 import { Html5Qrcode } from 'html5-qrcode';
 import toast from 'react-hot-toast';
@@ -9,8 +10,6 @@ import {
 import UploadDropZone from '../components/UploadDropZone';
 import VerifyResultCard from '../components/VerifyResultCard';
 
-
-
 // ─── Detect mobile/tablet ──────────────────────────────────────────────────────
 function isMobileOrTablet() {
   if (typeof navigator === 'undefined') return false;
@@ -18,10 +17,9 @@ function isMobileOrTablet() {
     || (navigator.maxTouchPoints && navigator.maxTouchPoints > 2);
 }
 
-
-
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 export default function VerifyCredentialPage() {
+  const [searchParams] = useSearchParams();
   const [credentialId, setCredentialId] = useState('');
   const [mode, setMode] = useState('idle'); // 'idle' | 'scan' | 'upload'
   const [verifyResult, setVerifyResult] = useState(null);
@@ -41,21 +39,76 @@ export default function VerifyCredentialPage() {
     };
   }, []);
 
-  // ── Verify API ──
-  const handleVerify = useCallback(async (idToVerify) => {
-    const trimmed = (idToVerify ?? credentialId).trim();
-    if (!trimmed) return toast.error('Vui lòng nhập Credential ID');
+  // ── Verify Selective Disclosure API ──
+  const handleVerifySelective = useCallback(async (payload) => {
     try {
       setIsVerifying(true);
       setVerifyResult(null);
-      const res = await credentialsApi.verifyCredential(trimmed);
+      const res = await credentialsApi.verifySelectiveCredential(payload);
+      setVerifyResult(res.data);
+      if (res.data?.metadata?.credentialId) {
+        setCredentialId(res.data.metadata.credentialId);
+      }
+    } catch (err) {
+      const msg = err?.response?.data?.message || err?.message || 'Không thể xác thực chứng chỉ';
+      setVerifyResult({
+        status: 'TAMPERED',
+        isValid: false,
+        isSelectiveDisclosure: true,
+        metadata: { credentialId: payload?.credentialId || 'N/A' },
+        revealedData: payload?.revealed || {},
+        hiddenFields: Object.keys(payload?.hidden || {}),
+        blockchainProof: {},
+        error: msg,
+      });
+    } finally {
+      setIsVerifying(false);
+    }
+  }, []);
+
+  // ── Verify Standard API (or detect Selective Disclosure payload) ──
+  const handleVerify = useCallback(async (idToVerify) => {
+    const raw = (idToVerify ?? credentialId).trim();
+    if (!raw) return toast.error('Vui lòng nhập Credential ID hoặc liên kết xác thực');
+
+    // Case A: User pastes a Selective Disclosure URL (containing ?sd=...)
+    if (raw.includes('sd=')) {
+      try {
+        const urlObj = new URL(raw.startsWith('http') ? raw : `http://dummy.com/${raw}`);
+        const sdParam = urlObj.searchParams.get('sd');
+        if (sdParam) {
+          const decoded = JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(sdParam)))));
+          return handleVerifySelective(decoded);
+        }
+      } catch (err) {
+        console.error('Failed to parse SD URL:', err);
+      }
+    }
+
+    // Case B: User pastes raw JSON package
+    if (raw.startsWith('{') && raw.endsWith('}')) {
+      try {
+        const parsed = JSON.parse(raw);
+        if (parsed.revealed && parsed.merkleRoot) {
+          return handleVerifySelective(parsed);
+        }
+      } catch (err) {
+        console.error('Failed to parse SD JSON:', err);
+      }
+    }
+
+    // Case C: Standard Credential ID verification
+    try {
+      setIsVerifying(true);
+      setVerifyResult(null);
+      const res = await credentialsApi.verifyCredential(raw);
       setVerifyResult(res.data);
     } catch (err) {
       const msg = err?.response?.data?.message || err?.message || 'Chứng chỉ không hợp lệ';
       setVerifyResult({
         status: 'INVALID',
         isValid: false,
-        metadata: { credentialId: trimmed },
+        metadata: { credentialId: raw },
         subjectData: {},
         blockchainProof: {},
         error: msg,
@@ -63,7 +116,24 @@ export default function VerifyCredentialPage() {
     } finally {
       setIsVerifying(false);
     }
-  }, [credentialId]);
+  }, [credentialId, handleVerifySelective]);
+
+  // ── Auto-verify from URL Search Params ──
+  useEffect(() => {
+    const sdParam = searchParams.get('sd');
+    const idParam = searchParams.get('id');
+    if (sdParam) {
+      try {
+        const decoded = JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(sdParam)))));
+        handleVerifySelective(decoded);
+      } catch {
+        toast.error('Liên kết xác thực không hợp lệ');
+      }
+    } else if (idParam) {
+      setCredentialId(idParam);
+      handleVerify(idParam);
+    }
+  }, [searchParams, handleVerifySelective, handleVerify]);
 
   // ── QR Camera ──
   const startScanner = useCallback(async () => {
@@ -140,7 +210,7 @@ export default function VerifyCredentialPage() {
         <div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">Xác minh Chứng chỉ</h1>
           <p className="text-gray-500 dark:text-gray-400 mt-2 text-sm leading-relaxed max-w-lg mx-auto">
-            Nhập Credential ID, quét mã QR bằng camera hoặc tải ảnh QR lên để kiểm tra tính hợp lệ trên Blockchain.
+            Nhập Credential ID, quét mã QR bằng camera hoặc tải ảnh lên để kiểm tra tính hợp lệ trên Blockchain.
           </p>
         </div>
       </div>
@@ -250,7 +320,7 @@ export default function VerifyCredentialPage() {
                   <div>
                     <p className="font-semibold text-sm text-gray-800 dark:text-gray-100">Quét QR bằng Camera</p>
                     <p className="text-[11px] text-gray-400 mt-0.5">
-                      {mobile ? 'Camera sau (rear camera)' : 'Webcam máy tính'}
+                      {mobile ? 'Camera sau trên điện thoại' : 'Webcam máy tính'}
                     </p>
                   </div>
                 </button>

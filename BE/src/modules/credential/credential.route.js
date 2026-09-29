@@ -151,6 +151,7 @@ CredentialRoute.post("/issue", AuthMiddleware.Authentication, AuthMiddleware.Aut
  *         $ref: '#/components/responses/InternalError'
  */
 CredentialRoute.post("/verify", AuthLimitMiddleware.readLimiter, CredentialValidator.verifyCredential, CredentialController.verifyCredential);
+CredentialRoute.post("/verify-selective", AuthLimitMiddleware.readLimiter, CredentialController.verifySelectiveCredential);
 
 /**
  * @swagger

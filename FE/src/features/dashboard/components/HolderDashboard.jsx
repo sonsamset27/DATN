@@ -34,7 +34,7 @@ export default function HolderDashboard() {
         <h2 className="text-lg font-semibold text-foreground mb-4">Truy cập nhanh</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           <QuickCard label="Chứng chỉ của tôi" icon={Award} href="/my-credentials" color="text-blue-500 bg-blue-50 dark:bg-blue-900/20" />
-          <QuickCard label="My DID" icon={Fingerprint} href="/my-did" color="text-indigo-500 bg-indigo-50 dark:bg-indigo-900/20" />
+          <QuickCard label="DID của tôi" icon={Fingerprint} href="/my-did" color="text-indigo-500 bg-indigo-50 dark:bg-indigo-900/20" />
           <QuickCard label="Xác minh" icon={CheckCircle2} href="/verify" color="text-emerald-500 bg-emerald-50 dark:bg-emerald-900/20" />
         </div>
       </div>

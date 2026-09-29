@@ -101,7 +101,7 @@ export default function IssueCredentialPage() {
           <div className="text-center py-8"><Loader2 className="animate-spin mx-auto text-primary" /></div>
         ) : templates.length === 0 ? (
           <div className="text-center py-8 text-danger">
-            Bạn chưa tạo Mẫu chứng chỉ (Template) nào. Hãy tạo Template trước khi cấp phát.
+            Chưa có mẫu chứng chỉ nào. Vui lòng tạo mẫu chứng chỉ trước khi cấp phát.
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -109,7 +109,7 @@ export default function IssueCredentialPage() {
               <h3 className="font-semibold text-lg border-b border-gray-100 dark:border-gray-700 pb-2">1. Thông tin chung</h3>
               
               <div>
-                <label className="block text-sm font-medium mb-1">Mẫu chứng chỉ (Template) *</label>
+                <label className="block text-sm font-medium mb-1">Mẫu chứng chỉ *</label>
                 <select
                   onChange={handleTemplateSelect}
                   value={selectedTemplate?._id || ''}
@@ -124,7 +124,7 @@ export default function IssueCredentialPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">Địa chỉ ví người nhận (Holder Address) *</label>
+                <label className="block text-sm font-medium mb-1">Địa chỉ ví người nhận *</label>
                 <input
                   type="text"
                   value={holderAddress}
@@ -136,7 +136,7 @@ export default function IssueCredentialPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">Ngày hết hạn (Tuỳ chọn)</label>
+                <label className="block text-sm font-medium mb-1">Ngày hết hạn</label>
                 <input
                   type="date"
                   value={expiresAt}
@@ -150,14 +150,14 @@ export default function IssueCredentialPage() {
               <div className="space-y-4 pt-4 border-t border-gray-100 dark:border-gray-700">
                 <h3 className="font-semibold text-lg flex items-center gap-2">
                   <FileKey className="text-secondary" size={20} /> 
-                  2. Dữ liệu chứng chỉ ({selectedTemplate.name})
+                  2. Dữ liệu chứng chỉ: {selectedTemplate.name}
                 </h3>
                 <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-gray-700 space-y-4">
                   {(selectedTemplate.fields || []).map((field) => (
                     <div key={field.name}>
                       <label className="block text-sm font-medium mb-1">
                         {field.label || field.name} {field.required && <span className="text-danger">*</span>}
-                        <span className="text-xs text-gray-400 lowercase ml-2">({field.type})</span>
+                        <span className="text-xs text-gray-400 ml-2 font-mono">{field.type}</span>
                       </label>
                       {field.type === 'select' ? (
                         <select

@@ -33,7 +33,7 @@ export default function AdminDashboard() {
     <>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         <StatCard gradient="from-rose-500 to-pink-600" icon={Users} label="Tổng người dùng" value={totalUsers} sub="Toàn hệ thống" loading={loadingUsers} />
-        <StatCard gradient="from-violet-500 to-purple-600" icon={FileBadge} label="Tổng mẫu chứng chỉ" value={totalTemplates} sub="Từ tất cả Issuer" loading={loadingTemplates} />
+        <StatCard gradient="from-violet-500 to-purple-600" icon={FileBadge} label="Tổng mẫu chứng chỉ" value={totalTemplates} sub="Tất cả đơn vị cấp" loading={loadingTemplates} />
         <StatCard gradient="from-emerald-500 to-teal-600" icon={ShieldCheck} label="Trạng thái hệ thống" value="Online" sub="Blockchain đang hoạt động" />
       </div>
 
@@ -52,9 +52,9 @@ export default function AdminDashboard() {
         <h2 className="text-lg font-semibold text-foreground mb-4">Truy cập nhanh</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <QuickCard label="Người dùng" icon={Users} href="/users" color="text-rose-500 bg-rose-50 dark:bg-rose-900/20" />
-          <QuickCard label="Templates" icon={FileBadge} href="/templates" color="text-violet-500 bg-violet-50 dark:bg-violet-900/20" />
-          <QuickCard label="Audit Logs" icon={Activity} href="/audit-logs" color="text-amber-500 bg-amber-50 dark:bg-amber-900/20" />
-          <QuickCard label="My DID" icon={Fingerprint} href="/my-did" color="text-indigo-500 bg-indigo-50 dark:bg-indigo-900/20" />
+          <QuickCard label="Mẫu chứng chỉ" icon={FileBadge} href="/templates" color="text-violet-500 bg-violet-50 dark:bg-violet-900/20" />
+          <QuickCard label="Nhật ký hệ thống" icon={Activity} href="/audit-logs" color="text-amber-500 bg-amber-50 dark:bg-amber-900/20" />
+          <QuickCard label="DID của tôi" icon={Fingerprint} href="/my-did" color="text-indigo-500 bg-indigo-50 dark:bg-indigo-900/20" />
         </div>
       </div>
     </>

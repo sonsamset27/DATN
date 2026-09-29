@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { credentialsApi } from '../services/credentials.api';
 import toast from 'react-hot-toast';
-import { X, RotateCcw, Wallet, ChevronRight, Loader2 } from 'lucide-react';
+import { X, RotateCcw, Wallet, ChevronRight, Loader2, AlertTriangle } from 'lucide-react';
 
 export default function ReissueModal({ onClose }) {
   const [oldWallet, setOldWallet] = useState('');
@@ -83,8 +83,9 @@ export default function ReissueModal({ onClose }) {
             />
           </div>
 
-          <div className="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-3 text-xs text-amber-700 dark:text-amber-400">
-            ⚠️ Thao tác này sẽ thu hồi toàn bộ chứng chỉ do tổ chức của bạn cấp từ ví cũ và tạo mới cho ví mới. Không thể hoàn tác.
+          <div className="flex items-start gap-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200/60 dark:border-amber-800/40 rounded-xl p-3 text-xs text-amber-700 dark:text-amber-400">
+            <AlertTriangle size={15} className="shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
+            <span>Thao tác này sẽ thu hồi toàn bộ chứng chỉ do tổ chức của bạn cấp từ ví cũ và tạo mới cho ví mới. Không thể hoàn tác.</span>
           </div>
 
           <div className="flex gap-3 pt-1">

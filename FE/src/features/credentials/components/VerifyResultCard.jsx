@@ -8,75 +8,71 @@ import CopyBtn from './CopyBtn';
 import InfoRow from './InfoRow';
 
 const STATUS_CONFIG = {
+  VERIFIED_SELECTIVE: {
+    valid: true,
+    title: 'Xác thực thành công',
+    subtitle: 'Chứng chỉ hợp lệ trên blockchain. Các trường riêng tư đã được ẩn và các trường còn lại khớp chính xác với dữ liệu gốc.',
+    gradient: 'from-violet-600 via-indigo-600 to-purple-700',
+    gradientLight: 'from-violet-50 to-indigo-50 dark:from-violet-950/40 dark:to-indigo-950/30',
+    border: 'border-violet-300 dark:border-violet-700',
+    ring: 'ring-violet-400/30',
+    badgeCls: 'bg-white/20 text-white border-white/30',
+    icon: ShieldCheck,
+  },
   VERIFIED: {
     valid: true,
-    title: 'CHỨNG CHỈ HỢP LỆ',
-    subtitle: 'Dữ liệu toàn vẹn, đã được xác minh thành công trên Blockchain.',
-    gradient: 'from-emerald-500 via-teal-500 to-cyan-600',
+    title: 'Chứng chỉ hợp lệ',
+    subtitle: 'Dữ liệu toàn vẹn, đã được xác minh thành công trên blockchain Sepolia.',
+    gradient: 'from-emerald-600 via-teal-600 to-cyan-700',
     gradientLight: 'from-emerald-50 to-teal-50 dark:from-emerald-950/40 dark:to-teal-950/30',
     border: 'border-emerald-200 dark:border-emerald-800',
     ring: 'ring-emerald-400/30',
-    badgeCls: 'bg-emerald-500/20 text-emerald-200 border-emerald-400/40',
+    badgeCls: 'bg-white/20 text-white border-white/30',
     icon: CheckCircle2,
-    iconBg: 'bg-emerald-500',
-    watermark: '✓',
-    watermarkCls: 'text-emerald-400/15',
   },
   REVOKED: {
     valid: false,
-    title: 'CHỨNG CHỈ ĐÃ BỊ THU HỒI',
-    subtitle: 'Chứng chỉ này đã bị tổ chức phát hành thu hồi và KHÔNG còn hiệu lực pháp lý.',
-    gradient: 'from-red-500 via-rose-500 to-pink-600',
+    title: 'Chứng chỉ đã bị thu hồi',
+    subtitle: 'Chứng chỉ này đã bị đơn vị cấp thu hồi và không còn giá trị sử dụng.',
+    gradient: 'from-rose-600 via-red-600 to-pink-700',
     gradientLight: 'from-red-50 to-rose-50 dark:from-red-950/40 dark:to-rose-950/30',
-    border: 'border-red-200 dark:border-red-800',
-    ring: 'ring-red-400/30',
-    badgeCls: 'bg-red-500/20 text-red-200 border-red-400/40',
+    border: 'border-rose-200 dark:border-rose-800',
+    ring: 'ring-rose-400/30',
+    badgeCls: 'bg-white/20 text-white border-white/30',
     icon: XCircle,
-    iconBg: 'bg-red-500',
-    watermark: '✕',
-    watermarkCls: 'text-red-400/12',
   },
   EXPIRED: {
     valid: false,
-    title: 'CHỨNG CHỈ HẾT HẠN',
-    subtitle: 'Chứng chỉ này đã quá thời hạn hiệu lực và không còn giá trị sử dụng.',
-    gradient: 'from-amber-500 via-orange-500 to-red-500',
+    title: 'Chứng chỉ đã hết hạn',
+    subtitle: 'Chứng chỉ này đã quá thời hạn hiệu lực.',
+    gradient: 'from-amber-600 via-orange-600 to-red-600',
     gradientLight: 'from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-orange-950/30',
     border: 'border-amber-200 dark:border-amber-800',
     ring: 'ring-amber-400/30',
-    badgeCls: 'bg-amber-500/20 text-amber-200 border-amber-400/40',
+    badgeCls: 'bg-white/20 text-white border-white/30',
     icon: AlertTriangle,
-    iconBg: 'bg-amber-500',
-    watermark: '⏰',
-    watermarkCls: 'text-amber-400/15',
   },
   TAMPERED: {
     valid: false,
-    title: 'DỮ LIỆU BỊ CAN THIỆP',
-    subtitle: 'Phát hiện dữ liệu chứng chỉ đã bị thay đổi trái phép — Hash không khớp với Blockchain.',
-    gradient: 'from-red-700 via-red-600 to-rose-700',
+    title: 'Dữ liệu không khớp',
+    subtitle: 'Mã xác thực của chứng chỉ không trùng khớp với bản ghi lưu trên blockchain.',
+    gradient: 'from-red-700 via-red-600 to-rose-800',
     gradientLight: 'from-red-50 to-rose-50 dark:from-red-950/40 dark:to-rose-950/30',
     border: 'border-red-300 dark:border-red-700',
     ring: 'ring-red-400/30',
-    badgeCls: 'bg-red-600/20 text-red-200 border-red-500/40',
+    badgeCls: 'bg-white/20 text-white border-white/30',
     icon: ShieldAlert,
-    iconBg: 'bg-red-700',
-    watermark: '⚠',
-    watermarkCls: 'text-red-400/12',
   },
   INVALID: {
     valid: false,
-    title: 'KHÔNG THỂ XÁC MINH',
-    subtitle: 'Không tìm thấy chứng chỉ hoặc có lỗi trong quá trình xác minh.',
-    gradient: 'from-gray-500 via-slate-500 to-gray-700',
+    title: 'Không thể xác minh',
+    subtitle: 'Không tìm thấy chứng chỉ hoặc dữ liệu kiểm tra không hợp lệ.',
+    gradient: 'from-slate-600 via-gray-600 to-zinc-700',
     gradientLight: 'from-gray-50 to-slate-50 dark:from-gray-900/50 dark:to-slate-900/30',
     border: 'border-gray-200 dark:border-gray-700',
     ring: 'ring-gray-400/20',
-    badgeCls: 'bg-gray-500/20 text-gray-300 border-gray-400/40',
+    badgeCls: 'bg-white/20 text-white border-white/30',
     icon: ShieldAlert,
-    iconBg: 'bg-gray-500',
-    watermark: '?',
-    watermarkCls: 'text-gray-400/12',
   },
 };
 
@@ -97,34 +93,29 @@ export default function VerifyResultCard({ result, onReset }) {
 
   return (
     <div
-      className={`rounded-3xl border-2 overflow-hidden shadow-2xl ${cfg.border} animate-in fade-in slide-in-from-bottom-6 duration-500`}
-      style={{ boxShadow: '0 25px 60px -15px rgba(0,0,0,0.18)' }}
+      className={`rounded-3xl border overflow-hidden shadow-xl ${cfg.border} animate-in fade-in slide-in-from-bottom-4 duration-400 bg-white dark:bg-slate-900`}
     >
-      {/* ── Premium Header ── */}
+      {/* ── Header ── */}
       <div className={`bg-gradient-to-br ${cfg.gradient} relative overflow-hidden`}>
-        {/* Watermark text */}
-        <div className={`absolute -top-4 -right-4 text-[140px] font-black leading-none select-none pointer-events-none ${cfg.watermarkCls}`}>
-          {cfg.watermark}
-        </div>
-        {/* Decorative blobs */}
-        <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full -translate-y-1/3 translate-x-1/3" />
-        <div className="absolute bottom-0 left-0 w-32 h-32 bg-black/10 rounded-full translate-y-1/2 -translate-x-1/3" />
+        {/* Decorative subtle ambient lights */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-black/15 rounded-full blur-2xl translate-y-1/3 -translate-x-1/4 pointer-events-none" />
 
         <div className="relative p-6 md:p-8">
           {/* Status icon + title */}
           <div className="flex items-start gap-4">
-            <div className="p-3 rounded-2xl bg-white/20 backdrop-blur-sm shadow-lg shrink-0 ring-1 ring-white/30">
-              <StatusIcon size={32} className="text-white" />
+            <div className="p-3 rounded-2xl bg-white/15 backdrop-blur-md shadow-md shrink-0 border border-white/25">
+              <StatusIcon size={28} className="text-white" />
             </div>
             <div className="flex-1 min-w-0">
-              <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[10px] font-bold uppercase tracking-wider mb-2 ${cfg.badgeCls}`}>
-                {cfg.valid ? <BadgeCheck size={11} /> : <XCircle size={11} />}
-                {cfg.valid ? 'Hợp lệ' : 'Không hợp lệ'}
+              <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-[11px] font-semibold tracking-wide mb-2 ${cfg.badgeCls}`}>
+                {cfg.valid ? <BadgeCheck size={12} /> : <XCircle size={12} />}
+                {result.isSelectiveDisclosure ? 'Chia sẻ có chọn lọc' : (cfg.valid ? 'Hợp lệ' : 'Không hợp lệ')}
               </div>
-              <h2 className="text-xl md:text-2xl font-black tracking-tight text-white leading-tight">
+              <h2 className="text-xl md:text-2xl font-bold tracking-tight text-white leading-tight">
                 {cfg.title}
               </h2>
-              <p className="text-white/75 text-sm mt-1.5 leading-relaxed">{cfg.subtitle}</p>
+              <p className="text-white/85 text-xs md:text-sm mt-1.5 leading-relaxed max-w-xl">{cfg.subtitle}</p>
             </div>
           </div>
 
@@ -169,7 +160,7 @@ export default function VerifyResultCard({ result, onReset }) {
             {result.status === 'REVOKED' ? <XCircle size={18} /> : <Clock size={18} />}
           </div>
           <div>
-            <p className="font-bold">{result.status === 'REVOKED' ? '⚠️ Chứng chỉ đã bị thu hồi' : '⏰ Chứng chỉ đã hết hạn'}</p>
+            <p className="font-bold">{result.status === 'REVOKED' ? 'Chứng chỉ đã bị thu hồi' : 'Chứng chỉ đã hết hạn'}</p>
             <p className={`text-xs font-normal mt-0.5 ${result.status === 'REVOKED' ? 'text-red-600 dark:text-red-500' : 'text-amber-600 dark:text-amber-500'}`}>
               {result.status === 'REVOKED'
                 ? 'Chứng chỉ này không còn giá trị pháp lý. Vui lòng liên hệ tổ chức phát hành để biết thêm thông tin.'
@@ -208,20 +199,20 @@ export default function VerifyResultCard({ result, onReset }) {
         {/* INFO tab */}
         {tab === 'info' && (
           <div className="p-5 md:p-6 space-y-0.5">
-            <InfoRow icon={Hash}       label="Credential ID"  value={metadata.credentialId}  mono copyable />
-            <InfoRow icon={Building2}  label="Issuer DID"     value={metadata.issuerDid}     mono copyable />
-            <InfoRow icon={Fingerprint} label="Holder DID"    value={metadata.holderDid}     mono copyable />
+            <InfoRow icon={Hash}       label="Mã chứng chỉ"  value={metadata.credentialId}  mono copyable />
+            <InfoRow icon={Building2}  label="Đơn vị cấp"     value={metadata.issuerDid}     mono copyable />
+            <InfoRow icon={Fingerprint} label="Người nhận"    value={metadata.holderDid}     mono copyable />
             <InfoRow icon={FileText}   label="Loại chứng chỉ" value={result.templateName} />
             <InfoRow icon={Calendar}   label="Ngày cấp"       value={fmtDate(metadata.issuedAt)} />
             <InfoRow
               icon={Clock}
-              label="Hiệu lực đến"
-              value={metadata.expiresAt === 'Never' ? 'Không giới hạn' : fmtDate(metadata.expiresAt)}
+              label="Thời hạn"
+              value={metadata.expiresAt === 'Never' ? 'Không thời hạn' : fmtDate(metadata.expiresAt)}
             />
             {/* Status chip */}
             <div className="pt-3">
-              <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border ${
-                result.status === 'VERIFIED'
+              <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border ${
+                result.status === 'VERIFIED' || result.status === 'VERIFIED_SELECTIVE'
                   ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-emerald-200 dark:border-emerald-700'
                   : result.status === 'REVOKED'
                   ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-700'
@@ -230,7 +221,7 @@ export default function VerifyResultCard({ result, onReset }) {
                   : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600'
               }`}>
                 <ShieldCheck size={13} />
-                Trạng thái: {metadata.status || result.status}
+                Trạng thái: {metadata.status === 'ACTIVE' ? 'Còn hiệu lực' : metadata.status === 'REVOKED' ? 'Đã thu hồi' : metadata.status === 'EXPIRED' ? 'Hết hạn' : 'Hợp lệ'}
               </span>
             </div>
           </div>
@@ -238,22 +229,61 @@ export default function VerifyResultCard({ result, onReset }) {
 
         {/* DATA tab */}
         {tab === 'data' && (
-          <div className="p-5 md:p-6">
-            {Object.keys(subjectData).length > 0 ? (
-              <div className="space-y-2">
-                {Object.entries(subjectData).map(([k, v]) => (
-                  <div key={k} className="flex justify-between items-start gap-4 py-3 px-4 rounded-xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700/50 hover:border-primary/30 transition-colors">
-                    <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider capitalize shrink-0 mt-0.5 min-w-[80px]">{k}</span>
-                    <span className="text-sm text-right text-gray-800 dark:text-gray-200 font-semibold break-all">{String(v)}</span>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <FileText size={40} className="mx-auto text-gray-200 dark:text-gray-600 mb-3" />
-                <p className="text-gray-400 text-sm">Không có dữ liệu nội dung</p>
+          <div className="p-5 md:p-6 space-y-4">
+            {result.isSelectiveDisclosure && (
+              <div className="p-3.5 rounded-xl bg-violet-50/70 dark:bg-violet-950/30 border border-violet-200/80 dark:border-violet-800/60 text-xs text-violet-900 dark:text-violet-200 flex items-center gap-2.5">
+                <ShieldCheck size={16} className="text-violet-600 dark:text-violet-400 shrink-0" />
+                <span className="leading-relaxed">
+                  Người sở hữu đã chọn ẩn một số mục riêng tư. Các thông tin hiển thị còn lại đều khớp chính xác với dữ liệu gốc trên blockchain.
+                </span>
               </div>
             )}
+
+            {/* List with clean border & divider (shadcn card list) */}
+            <div className="rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900/60 overflow-hidden divide-y divide-slate-100 dark:divide-slate-800">
+              {Object.keys(result.revealedData || subjectData).map((k) => {
+                const val = (result.revealedData || subjectData)[k];
+                return (
+                  <div key={k} className="flex items-center justify-between py-3.5 px-4 hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-mono font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">{k}</span>
+                      {result.isSelectiveDisclosure && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/60">
+                          Công khai
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-sm font-semibold text-slate-900 dark:text-slate-100 break-all">{String(val)}</span>
+                  </div>
+                );
+              })}
+
+              {/* Hidden Fields if Selective Disclosure */}
+              {result.hiddenFields && result.hiddenFields.map((k) => (
+                <div key={k} className="flex items-center justify-between py-3.5 px-4 bg-slate-50/50 dark:bg-slate-900/30 hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-mono font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider">{k}</span>
+                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200/80 dark:border-slate-700/80">
+                      Đã ẩn
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2.5">
+                    <span className="font-mono text-xs text-slate-400 dark:text-slate-500 tracking-widest select-none">••••••••••••</span>
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                      <ShieldCheck size={12} className="text-slate-500 shrink-0" />
+                      Đã ẩn
+                    </span>
+                  </div>
+                </div>
+              ))}
+
+              {!Object.keys(result.revealedData || subjectData).length && (!result.hiddenFields || !result.hiddenFields.length) && (
+                <div className="text-center py-12">
+                  <FileText size={40} className="mx-auto text-gray-200 dark:text-gray-600 mb-3" />
+                  <p className="text-gray-400 text-sm">Không có dữ liệu nội dung</p>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
@@ -261,11 +291,11 @@ export default function VerifyResultCard({ result, onReset }) {
         {tab === 'proof' && (
           <div className="p-5 md:p-6 space-y-3">
             {[
-              { label: 'TX Hash', value: proof.txHash },
-              { label: 'IPFS CID', value: proof.cid },
-              { label: 'Computed Hash', value: proof.credentialHash },
-              { label: 'Blockchain Hash', value: proof.blockchainHash },
-            ].map(row => (
+              { label: 'Mã giao dịch', value: proof.txHash },
+              { label: 'Mã lưu trữ IPFS', value: proof.cid },
+              { label: result.isSelectiveDisclosure ? 'Mã gốc Merkle' : 'Mã băm dữ liệu', value: proof.merkleRoot || proof.credentialHash },
+              { label: 'Mã lưu trên blockchain', value: proof.blockchainHash },
+            ].filter(r => r.value !== undefined).map(row => (
               <div key={row.label} className="bg-gray-50 dark:bg-gray-900/60 rounded-xl p-4 border border-gray-100 dark:border-gray-700/50">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">{row.label}</span>
@@ -287,9 +317,9 @@ export default function VerifyResultCard({ result, onReset }) {
                 {proof.isHashValid ? <CheckCircle2 size={16} /> : <XCircle size={16} />}
               </div>
               <div>
-                <p>{proof.isHashValid ? 'Hash khớp — Dữ liệu toàn vẹn' : 'Hash KHÔNG khớp — Dữ liệu đã bị can thiệp'}</p>
+                <p>{proof.isHashValid ? (result.isSelectiveDisclosure ? 'Khớp mã gốc, dữ liệu toàn vẹn' : 'Khớp mã băm, dữ liệu toàn vẹn') : 'Dữ liệu không khớp với bản ghi trên blockchain'}</p>
                 <p className="text-xs font-normal mt-0.5 opacity-70">
-                  {proof.isHashValid ? 'Dữ liệu chứng chỉ chưa bị thay đổi kể từ khi phát hành.' : 'Cảnh báo: nội dung chứng chỉ có thể đã bị chỉnh sửa.'}
+                  {proof.isHashValid ? (result.isSelectiveDisclosure ? 'Dữ liệu được đối soát thành công qua Merkle Tree từ các trường công khai và các nhánh ẩn.' : 'Nội dung chứng chỉ khớp hoàn toàn với bản gốc đã phát hành.') : 'Nội dung chứng chỉ không trùng khớp với dữ liệu đã lưu.'}
                 </p>
               </div>
             </div>

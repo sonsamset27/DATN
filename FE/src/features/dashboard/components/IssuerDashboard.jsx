@@ -41,17 +41,17 @@ export default function IssuerDashboard({ user }) {
 
       {/* Stats row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-        <StatCard gradient="from-blue-500 to-cyan-600" icon={FileBadge} label="Mẫu chứng chỉ đã tạo" value={totalTemplates} sub="Templates của bạn" loading={loadingTemplates} />
-        <StatCard gradient="from-emerald-500 to-teal-600" icon={Award} label="Chứng chỉ đã cấp" value={totalIssued} sub="Cho các Holder" loading={loadingCreds} />
+        <StatCard gradient="from-blue-500 to-cyan-600" icon={FileBadge} label="Mẫu chứng chỉ đã tạo" value={totalTemplates} sub="Mẫu của bạn" loading={loadingTemplates} />
+        <StatCard gradient="from-emerald-500 to-teal-600" icon={Award} label="Chứng chỉ đã cấp" value={totalIssued} sub="Đã cấp cho người nhận" loading={loadingCreds} />
       </div>
 
       <div>
         <h2 className="text-lg font-semibold text-foreground mb-4">Truy cập nhanh</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <QuickCard label="Templates" icon={FileBadge} href="/templates" color="text-violet-500 bg-violet-50 dark:bg-violet-900/20" />
+          <QuickCard label="Mẫu chứng chỉ" icon={FileBadge} href="/templates" color="text-violet-500 bg-violet-50 dark:bg-violet-900/20" />
           <QuickCard label="Chứng chỉ đã cấp" icon={Award} href="/issued-credentials" color="text-blue-500 bg-blue-50 dark:bg-blue-900/20" />
           <QuickCard label="Cấp chứng chỉ" icon={TrendingUp} href="/issue-credential" color="text-emerald-500 bg-emerald-50 dark:bg-emerald-900/20" />
-          <QuickCard label="My DID" icon={Fingerprint} href="/my-did" color="text-indigo-500 bg-indigo-50 dark:bg-indigo-900/20" />
+          <QuickCard label="DID của tôi" icon={Fingerprint} href="/my-did" color="text-indigo-500 bg-indigo-50 dark:bg-indigo-900/20" />
         </div>
       </div>
     </>

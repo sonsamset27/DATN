@@ -345,7 +345,7 @@ export default function TemplatesListPage() {
                       </div>
                     )}
                     <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-3 border border-gray-100 dark:border-gray-700">
-                      <p className="text-xs text-gray-400 uppercase font-semibold mb-1">Người tạo (DID)</p>
+                      <p className="text-xs text-gray-400 uppercase font-semibold mb-1">Người tạo</p>
                       <p className="font-medium font-mono text-xs break-all">{detail.issuerId?.did || detail.issuerId?.walletAddress || 'N/A'}</p>
                     </div>
                     <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-3 border border-gray-100 dark:border-gray-700">
@@ -357,7 +357,7 @@ export default function TemplatesListPage() {
                   {/* Fields */}
                   <div>
                     <h3 className="text-sm font-bold uppercase text-gray-500 dark:text-gray-400 mb-3">
-                      Cấu trúc dữ liệu ({detail.fields?.length || 0} trường)
+                      Cấu trúc dữ liệu • {detail.fields?.length || 0} trường
                     </h3>
                     <div className="space-y-2">
                       {(detail.fields || []).map((field, idx) => (
@@ -367,7 +367,7 @@ export default function TemplatesListPage() {
                               {field.type}
                             </span>
                             <span className="font-semibold text-sm truncate">{field.label}</span>
-                            <span className="text-xs text-gray-400 font-mono truncate">({field.name})</span>
+                            <span className="text-xs text-gray-400 font-mono truncate">{field.name}</span>
                           </div>
                           <div className="flex items-center gap-2 text-xs shrink-0">
                             {field.required && (
@@ -486,10 +486,10 @@ export default function TemplatesListPage() {
 
                 {/* Schema Builder */}
                 <div className="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700 space-y-4">
-                  <h3 className="font-semibold text-sm">Cấu trúc dữ liệu (Schema)</h3>
+                  <h3 className="font-semibold text-sm">Cấu trúc dữ liệu</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs text-gray-500 mb-1">Tên trường (name) <span className="text-red-400">*</span></label>
+                      <label className="block text-xs text-gray-500 mb-1">Tên trường dữ liệu <span className="text-red-400">*</span></label>
                       <input
                         type="text"
                         placeholder="VD: gpa"
@@ -499,7 +499,7 @@ export default function TemplatesListPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs text-gray-500 mb-1">Nhãn hiển thị (label) <span className="text-red-400">*</span></label>
+                      <label className="block text-xs text-gray-500 mb-1">Tên hiển thị <span className="text-red-400">*</span></label>
                       <input
                         type="text"
                         placeholder="VD: Điểm trung bình"
@@ -519,7 +519,7 @@ export default function TemplatesListPage() {
                         <option value="number">Number</option>
                         <option value="date">Date</option>
                         <option value="boolean">Boolean</option>
-                        <option value="select">Select (Dropdown)</option>
+                        <option value="select">Danh sách chọn</option>
                       </select>
                     </div>
                     <div className="flex items-end">
@@ -582,7 +582,7 @@ export default function TemplatesListPage() {
                             {field.type}
                           </span>
                           <span className="text-sm font-semibold truncate max-w-[120px] sm:max-w-none">{field.label}</span>
-                          <span className="text-xs text-gray-400 font-mono hidden sm:inline">({field.name})</span>
+                          <span className="text-xs text-gray-400 font-mono hidden sm:inline">{field.name}</span>
                           {field.required && <span className="text-[10px] text-red-400 font-bold shrink-0">*</span>}
                           {field.type === 'select' && field.options?.length > 0 && <span className="text-[10px] text-gray-400 hidden sm:inline">[{field.options.join(', ')}]</span>}
                         </div>
@@ -607,7 +607,7 @@ export default function TemplatesListPage() {
                     Huỷ
                   </button>
                   <button type="submit" disabled={createMutation.isPending || updateMutation.isPending} className="px-5 py-2.5 bg-primary text-white rounded-xl disabled:opacity-70 hover:bg-primary/90 transition-colors text-sm font-medium cursor-pointer">
-                    {createMutation.isPending || updateMutation.isPending ? 'Đang lưu...' : (editingId ? 'Cập nhật Template' : 'Lưu Template')}
+                    {createMutation.isPending || updateMutation.isPending ? 'Đang lưu...' : (editingId ? 'Cập nhật mẫu' : 'Lưu mẫu')}
                   </button>
                 </div>
               </form>

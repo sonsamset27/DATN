@@ -26,9 +26,14 @@ export const credentialsApi = {
     return await axiosInstance.post('/credentials/issue', data);
   },
 
-  // Xác minh chứng chỉ
+  // Xác minh chứng chỉ thông thường
   verifyCredential: async (credentialId) => {
     return await axiosInstance.post('/credentials/verify', { credentialId });
+  },
+
+  // Xác minh chứng chỉ tiết lộ có chọn lọc (Selective Disclosure)
+  verifySelectiveCredential: async (payload) => {
+    return await axiosInstance.post('/credentials/verify-selective', payload);
   },
 
   // Cấp lại toàn bộ chứng chỉ từ ví cũ sang ví mới

@@ -8,6 +8,7 @@ import CredentialValidator from "./credential.validator.js";
 import AuditLogService from "../auditLog/auditLog.service.js";
 import AppError from "../../shared/errors/AppError.js";
 import ErrorCodes from "../../shared/errors/errorCodes.js";
+import { MerkleUtil } from "../../shared/utils/merkle.util.js";
 import crypto from "crypto";
 
 const resolveCredentialStatus = (cred) => {
@@ -56,12 +57,18 @@ const CredentialService = {
             const issuerDid = await DidService.getDidByAddress(user.walletAddress);
             const holderDid = await DidService.getDidByAddress(data.holderAddress);
 
+            // Merkle Tree generation for Selective Disclosure
+            const salts = MerkleUtil.generateSalts(data.credentialSubject);
+            const { root: merkleRoot } = MerkleUtil.buildMerkleTree(data.credentialSubject, salts);
+
             const dataIpfs = {
                 credentialId: GenerateIdUltil.generateCredentialId(user.organizationCode),
                 issuerDid: issuerDid.did,
                 holderDid: holderDid.did,
                 credentialTemplateId: data.credentialTemplateId,
                 credentialSubject: data.credentialSubject,
+                salts,
+                merkleRoot,
                 issuedAt: new Date().toISOString(),
                 expiresAt: data.expiresAt,
                 signatureAlgorithm: "ECC",
@@ -69,8 +76,8 @@ const CredentialService = {
 
             const cid = await IpfsService.pinJsonToIpfs(dataIpfs);
 
-            const jsonString = JSON.stringify(dataIpfs);
-            const credentialHash = "0x" + crypto.createHash("sha256").update(jsonString).digest("hex");
+            // Anchor Merkle Root on Blockchain as the cryptographic credentialHash
+            const credentialHash = merkleRoot;
             const expiresAt = dataIpfs.expiresAt
                 ? Math.floor(new Date(dataIpfs.expiresAt).getTime() / 1000)
                 : 0;
@@ -139,11 +146,28 @@ const CredentialService = {
             throw AppError.internal(ErrorCodes.CREDENTIAL_006, "Failed to read credential data from IPFS");
         }
 
-        const jsonString = JSON.stringify(dataIpfs);
-        const credentialHash = "0x" + crypto.createHash("sha256").update(jsonString).digest("hex");
+        let credentialHash;
+        let isHashValid;
         const credentialHashBlockchain = await BlockchainService.getCredentialHash(credentialId);
 
-        const isHashValid = credentialHash === credentialHashBlockchain;
+        if (dataIpfs.merkleRoot) {
+            // Merkle Tree verification
+            const { root: calculatedRoot } = MerkleUtil.buildMerkleTree(
+                dataIpfs.credentialSubject,
+                dataIpfs.salts || {}
+            );
+            credentialHash = calculatedRoot;
+            isHashValid = (
+                calculatedRoot.toLowerCase() === dataIpfs.merkleRoot.toLowerCase() &&
+                calculatedRoot.toLowerCase() === credentialHashBlockchain.toLowerCase()
+            );
+        } else {
+            // Legacy SHA-256 fallback
+            const jsonString = JSON.stringify(dataIpfs);
+            credentialHash = "0x" + crypto.createHash("sha256").update(jsonString).digest("hex");
+            isHashValid = credentialHash.toLowerCase() === credentialHashBlockchain.toLowerCase();
+        }
+
         const isRevoked = credential.status === "REVOKED";
         const isExpired = credential.expiresAt && new Date(credential.expiresAt) < new Date();
 
@@ -161,8 +185,6 @@ const CredentialService = {
             templateName = template?.name || null;
         } catch { }
 
-        // AuditLog for VERIFY removed to prevent DB spam from public guest verifications.
-
         return {
             status: finalStatus,
             isValid: isHashValid && !isRevoked && !isExpired,
@@ -177,12 +199,15 @@ const CredentialService = {
                 status: credential.status,
             },
             subjectData: dataIpfs.credentialSubject,
+            salts: dataIpfs.salts || null,
+            merkleRoot: dataIpfs.merkleRoot || null,
             blockchainProof: {
                 credentialHash,
                 blockchainHash: credentialHashBlockchain,
                 txHash: credential.txHash,
                 cid: credential.cid,
                 isHashValid,
+                isMerkleTree: !!dataIpfs.merkleRoot,
             },
         };
     },
@@ -288,10 +313,34 @@ const CredentialService = {
             throw AppError.internal(ErrorCodes.CREDENTIAL_006, "Failed to read data from IPFS");
         }
 
-        const jsonString = JSON.stringify(dataIpfs);
-        const computedHash = "0x" + crypto.createHash("sha256").update(jsonString).digest("hex");
-        const blockchainHash = await BlockchainService.getCredentialHash(credentialId);
-        const isHashValid = computedHash === blockchainHash;
+        let blockchainHash = null;
+        try {
+            blockchainHash = await BlockchainService.getCredentialHash(credentialId);
+        } catch (err) {
+            console.warn(`[getCredentialById] Failed to fetch hash from blockchain for ${credentialId}, fallback to DB:`, err.message);
+            blockchainHash = credential.credentialHash;
+        }
+        if (!blockchainHash) {
+            blockchainHash = credential.credentialHash || "";
+        }
+
+        let computedHash;
+        let isHashValid;
+        if (dataIpfs.merkleRoot) {
+            const { root: calculatedRoot } = MerkleUtil.buildMerkleTree(
+                dataIpfs.credentialSubject,
+                dataIpfs.salts || {}
+            );
+            computedHash = calculatedRoot;
+            isHashValid = (
+                calculatedRoot.toLowerCase() === dataIpfs.merkleRoot.toLowerCase() &&
+                calculatedRoot.toLowerCase() === blockchainHash.toLowerCase()
+            );
+        } else {
+            const jsonString = JSON.stringify(dataIpfs);
+            computedHash = "0x" + crypto.createHash("sha256").update(jsonString).digest("hex");
+            isHashValid = computedHash.toLowerCase() === blockchainHash.toLowerCase();
+        }
 
         let finalStatus = "ACTIVE";
         if (isRevoked) finalStatus = "REVOKED";
@@ -310,11 +359,74 @@ const CredentialService = {
                 expiresAt: credential.expiresAt || "Never",
             },
             subjectData: dataIpfs.credentialSubject,
+            salts: dataIpfs.salts || null,
+            merkleRoot: dataIpfs.merkleRoot || null,
             proof: {
                 cid: credential.cid,
                 computedHash,
                 blockchainHash,
                 txHash: credential.txHash,
+                isMerkleTree: !!dataIpfs.merkleRoot,
+            },
+        };
+    },
+
+    verifySelectiveCredential: async (payload) => {
+        const { credentialId, revealed, salts, hidden, merkleRoot } = payload;
+        if (!credentialId || !merkleRoot) {
+            throw AppError.badRequest(ErrorCodes.CREDENTIAL_004, "credentialId and merkleRoot are required");
+        }
+
+        const credential = await CredentialRepository.getCredentialByCredentialId(credentialId);
+        if (!credential) {
+            throw AppError.notFound(ErrorCodes.CREDENTIAL_001, "Credential not found in database");
+        }
+
+        const blockchainHash = await BlockchainService.getCredentialHash(credentialId);
+        const verification = MerkleUtil.verifySelectiveDisclosure(
+            { revealed, salts, hidden, merkleRoot },
+            blockchainHash
+        );
+
+        const isRevoked = credential.status === "REVOKED";
+        const isExpired = credential.expiresAt && new Date(credential.expiresAt) < new Date();
+
+        let finalStatus = "VERIFIED_SELECTIVE";
+        if (!verification.isValid) finalStatus = "TAMPERED";
+        else if (isRevoked) finalStatus = "REVOKED";
+        else if (isExpired) finalStatus = "EXPIRED";
+
+        // Template name
+        let templateName = null;
+        try {
+            const template = await CredentialTemplateService.getCredentialTemplateById(
+                credential.credentialTemplateId
+            );
+            templateName = template?.name || null;
+        } catch { }
+
+        return {
+            status: finalStatus,
+            isValid: verification.isValid && !isRevoked && !isExpired,
+            isSelectiveDisclosure: true,
+            templateName,
+            metadata: {
+                credentialId: credential.credentialId,
+                issuerDid: credential.issuerDid,
+                holderDid: credential.holderDid,
+                issuedAt: credential.issuedAt,
+                expiresAt: credential.expiresAt || "Never",
+                status: credential.status,
+            },
+            revealedData: revealed || {},
+            hiddenFields: Object.keys(hidden || {}),
+            blockchainProof: {
+                merkleRoot,
+                blockchainHash,
+                txHash: credential.txHash,
+                isRootMatch: verification.isRootMatch,
+                isOnChainMatch: verification.isOnChainMatch,
+                isHashValid: verification.isValid,
             },
         };
     },

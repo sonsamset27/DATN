@@ -38,8 +38,8 @@ export default function DetailSidebar({ cred, onClose }) {
             <div className="mt-3">
               <StatusBadge status={detail.status} />
               {detail.isValid !== undefined && (
-                <span className={`ml-2 text-[11px] font-semibold ${detail.isValid ? 'text-emerald-300' : 'text-red-300'}`}>
-                  {detail.isValid ? '✓ Hash hợp lệ' : '✗ Hash không khớp'}
+                <span className={`ml-2 text-[11px] font-medium px-2 py-0.5 rounded ${detail.isValid ? 'bg-emerald-500/20 text-emerald-200' : 'bg-red-500/20 text-red-200'}`}>
+                  {detail.isValid ? 'Hợp lệ' : 'Không khớp'}
                 </span>
               )}
             </div>
@@ -70,9 +70,9 @@ export default function DetailSidebar({ cred, onClose }) {
               {tab === 'info' && (
                 <div className="space-y-2.5">
                   {[
-                    { label: 'Template', value: detail.metadata?.templateId },
-                    { label: 'Issuer DID', value: detail.metadata?.issuerDid, mono: true },
-                    { label: 'Holder DID', value: detail.metadata?.holderDid, mono: true },
+                    { label: 'Mẫu chứng chỉ', value: detail.metadata?.templateId },
+                    { label: 'Đơn vị cấp', value: detail.metadata?.issuerDid, mono: true },
+                    { label: 'Người nhận', value: detail.metadata?.holderDid, mono: true },
                     { label: 'Ngày cấp', value: new Date(detail.metadata?.issuedAt).toLocaleString('vi-VN') },
                     { label: 'Hết hạn', value: detail.metadata?.expiresAt === 'Never' ? 'Không giới hạn' : new Date(detail.metadata?.expiresAt).toLocaleString('vi-VN') },
                   ].map(row => (
@@ -102,10 +102,10 @@ export default function DetailSidebar({ cred, onClose }) {
               {tab === 'proof' && (
                 <div className="space-y-3">
                   {[
-                    { label: 'TX Hash', value: detail.proof?.txHash },
-                    { label: 'IPFS CID', value: detail.proof?.cid },
-                    { label: 'Computed Hash', value: detail.proof?.computedHash },
-                    { label: 'Blockchain Hash', value: detail.proof?.blockchainHash },
+                    { label: 'Mã giao dịch', value: detail.proof?.txHash },
+                    { label: 'Mã lưu trữ IPFS', value: detail.proof?.cid },
+                    { label: 'Mã băm dữ liệu', value: detail.proof?.computedHash },
+                    { label: 'Mã trên blockchain', value: detail.proof?.blockchainHash },
                   ].map(row => (
                     <div key={row.label} className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3">
                       <div className="flex justify-between items-center mb-1">

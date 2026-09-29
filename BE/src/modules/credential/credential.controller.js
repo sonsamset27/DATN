@@ -53,6 +53,31 @@ const CredentialController = {
         }
     },
 
+    verifySelectiveCredential: async (req, res) => {
+        try {
+            const verified = await CredentialService.verifySelectiveCredential(req.body);
+            return res.status(HttpStatus.OK).json({
+                message: "Selective credential verified successfully",
+                data: verified,
+            });
+        } catch (error) {
+            if (!(error instanceof AppError)) {
+                console.error("Error at verifySelectiveCredential: ", error);
+            }
+            if (error instanceof AppError) {
+                return res.status(error.statusCode).json({
+                    errorCode: error.errorCode,
+                    message: error.message,
+                });
+            }
+            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+                errorCode: "SYS_001",
+                message: "Failed to verify selective credential",
+                error: error.message,
+            });
+        }
+    },
+
     getOwnCredentials: async (req, res) => {
         try {
             const result = await CredentialService.getOwnCredentials(req.user, req.query);

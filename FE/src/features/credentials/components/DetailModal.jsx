@@ -5,10 +5,12 @@ import { QRCodeSVG } from 'qrcode.react';
 import { Award, Share2, ShieldCheck, ShieldX, X, ExternalLink, Loader2 } from 'lucide-react';
 import StatusBadge from './StatusBadge';
 import CopyBtn from './CopyBtn';
+import SelectiveDisclosureModal from './SelectiveDisclosureModal';
 
 export default function DetailModal({ cred, onClose }) {
   const [tab, setTab] = useState('info');
   const [showQR, setShowQR] = useState(false);
+  const [showSD, setShowSD] = useState(false);
 
   const { data: detailRes, isLoading } = useQuery({
     queryKey: ['credential-detail', cred.credentialId],
@@ -41,8 +43,20 @@ export default function DetailModal({ cred, onClose }) {
               <h2 className="font-bold text-lg leading-tight line-clamp-1">{cred.templateName || 'Chứng chỉ số'}</h2>
             </div>
           </div>
-          <div className="mt-4">
+          <div className="mt-4 flex flex-wrap items-center gap-2">
             <StatusBadge status={detail?.status || cred.status} />
+            {detail && (
+              detail.proof?.isMerkleTree || detail.merkleRoot ? (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-medium bg-white/20 text-white border border-white/30 backdrop-blur-sm">
+                  <ShieldCheck size={12} className="text-emerald-300" />
+                  Merkle Tree 2.0
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-medium bg-black/20 text-white/90 border border-white/15 backdrop-blur-sm">
+                  Bản cấp trước
+                </span>
+              )
+            )}
           </div>
         </div>
 
@@ -77,11 +91,11 @@ export default function DetailModal({ cred, onClose }) {
               {tab === 'info' && (
                 <div className="space-y-3">
                   {[
-                    { label: 'Credential ID', value: detail?.metadata?.credentialId || cred.credentialId, mono: true },
+                    { label: 'Mã chứng chỉ', value: detail?.metadata?.credentialId || cred.credentialId, mono: true },
                     { label: 'Ngày cấp', value: new Date(cred.issuedAt).toLocaleString('vi-VN') },
-                    { label: 'Hết hạn', value: cred.expiresAt === 'Never' ? 'Không giới hạn' : new Date(cred.expiresAt).toLocaleString('vi-VN') },
-                    { label: 'Issuer DID', value: cred.issuerDid, mono: true },
-                    { label: 'Holder DID', value: detail?.metadata?.holderDid || '—', mono: true },
+                    { label: 'Hết hạn', value: cred.expiresAt === 'Never' ? 'Không thời hạn' : new Date(cred.expiresAt).toLocaleString('vi-VN') },
+                    { label: 'Đơn vị cấp', value: cred.issuerDid, mono: true },
+                    { label: 'Người nhận', value: detail?.metadata?.holderDid || '—', mono: true },
                   ].map(row => (
                     <div key={row.label} className="flex justify-between items-start gap-3 py-2 border-b border-gray-50 dark:border-gray-800">
                       <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 shrink-0 w-28">{row.label}</span>
@@ -101,7 +115,7 @@ export default function DetailModal({ cred, onClose }) {
                         : 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400'
                     }`}>
                       {detail.isValid ? <ShieldCheck size={18} /> : <ShieldX size={18} />}
-                      {detail.isValid ? 'Chứng chỉ hợp lệ — đã được xác minh trên blockchain' : 'Chứng chỉ KHÔNG hợp lệ'}
+                      {detail.isValid ? 'Chứng chỉ hợp lệ, đã xác thực trên blockchain' : 'Chứng chỉ không hợp lệ'}
                     </div>
                   )}
                 </div>
@@ -124,11 +138,17 @@ export default function DetailModal({ cred, onClose }) {
 
               {tab === 'proof' && (
                 <div className="space-y-3">
+                  <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 text-xs flex items-center justify-between">
+                    <span className="text-slate-500 dark:text-slate-400 font-medium">Cơ chế xác thực</span>
+                    <span className={`font-mono font-semibold px-2 py-0.5 rounded text-[11px] ${detail?.proof?.isMerkleTree ? 'bg-violet-100 dark:bg-violet-950 text-violet-700 dark:text-violet-300' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'}`}>
+                      {detail?.proof?.isMerkleTree ? 'Keccak256 Merkle Tree' : 'SHA-256'}
+                    </span>
+                  </div>
                   {[
-                    { label: 'TX Hash', value: detail?.proof?.txHash || cred.txHash },
-                    { label: 'IPFS CID', value: detail?.proof?.cid || cred.cid },
-                    { label: 'Computed Hash', value: detail?.proof?.computedHash },
-                    { label: 'Blockchain Hash', value: detail?.proof?.blockchainHash },
+                    { label: 'Mã giao dịch', value: detail?.proof?.txHash || cred.txHash },
+                    { label: 'Mã lưu trữ IPFS', value: detail?.proof?.cid || cred.cid },
+                    { label: detail?.proof?.isMerkleTree ? 'Mã gốc Merkle' : 'Mã băm dữ liệu', value: detail?.proof?.computedHash },
+                    { label: 'Mã lưu trên blockchain', value: detail?.proof?.blockchainHash },
                   ].map(row => (
                     <div key={row.label} className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3">
                       <div className="flex justify-between items-center mb-1">
@@ -145,25 +165,41 @@ export default function DetailModal({ cred, onClose }) {
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-gray-100 dark:border-gray-700 flex gap-3 shrink-0">
+        <div className="p-4 border-t border-gray-100 dark:border-gray-700 flex flex-wrap gap-2.5 shrink-0">
+          <button
+            onClick={() => setShowSD(true)}
+            className="flex-1 min-w-[140px] flex items-center justify-center gap-1.5 py-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-xl text-xs font-bold hover:opacity-95 shadow-md shadow-violet-500/20 transition-all"
+          >
+            <ShieldCheck size={15} /> Chia sẻ có chọn lọc
+          </button>
           <button
             onClick={() => setShowQR(true)}
-            className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-primary text-white rounded-xl font-medium hover:bg-primary/90 transition-colors"
+            className="flex-1 min-w-[110px] flex items-center justify-center gap-1.5 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 rounded-xl text-xs font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
           >
-            <Share2 size={16} /> Chia sẻ QR
+            <Share2 size={15} /> Mã QR gốc
           </button>
           {cred.txHash && (
             <a
               href={`https://sepolia.etherscan.io/tx/${cred.txHash}`}
               target="_blank"
               rel="noreferrer"
-              className="px-4 flex items-center justify-center gap-2 py-2.5 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              className="px-3.5 flex items-center justify-center gap-1.5 py-2.5 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              title="Xem giao dịch trên Etherscan"
             >
-              <ExternalLink size={16} />
+              <ExternalLink size={15} />
             </a>
           )}
         </div>
       </div>
+
+      {/* Selective Disclosure Modal */}
+      {showSD && (
+        <SelectiveDisclosureModal
+          cred={cred}
+          detail={detail}
+          onClose={() => setShowSD(false)}
+        />
+      )}
 
       {/* QR popup */}
       {showQR && (

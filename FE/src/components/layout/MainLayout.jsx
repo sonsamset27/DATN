@@ -83,7 +83,7 @@ export default function MainLayout() {
                 user?.role === 'ISSUER' ? 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' :
                   'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
                 }`}>
-                {user?.role}
+                {user?.role === 'ADMIN' ? 'Quản trị viên' : user?.role === 'ISSUER' ? 'Đơn vị cấp' : 'Người dùng'}
               </span>
             </div>
           </div>
@@ -93,7 +93,7 @@ export default function MainLayout() {
         <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
           <Link to="/dashboard" className={navLinkClass('/dashboard')} onClick={handleLinkClick}>
             <Home size={18} />
-            <span>Dashboard</span>
+            <span>Tổng quan</span>
           </Link>
 
           {user?.role === 'ADMIN' && (
@@ -104,14 +104,14 @@ export default function MainLayout() {
               </Link>
               <Link to="/audit-logs" className={navLinkClass('/audit-logs')} onClick={handleLinkClick}>
                 <Activity size={18} />
-                <span>Audit Logs</span>
+                <span>Nhật ký hệ thống</span>
               </Link>
             </>
           )}
 
           <Link to="/my-did" className={navLinkClass('/my-did')} onClick={handleLinkClick}>
             <Fingerprint size={18} />
-            <span>My DID</span>
+            <span>DID của tôi</span>
           </Link>
 
           {user?.role === 'HOLDER' && (
@@ -124,7 +124,7 @@ export default function MainLayout() {
           {(user?.role === 'ADMIN' || user?.role === 'ISSUER') && (
             <Link to="/templates" className={navLinkClass('/templates')} onClick={handleLinkClick}>
               <FileBadge size={18} />
-              <span>Templates</span>
+              <span>Mẫu chứng chỉ</span>
             </Link>
           )}
 
@@ -137,7 +137,7 @@ export default function MainLayout() {
 
           <Link to="/verify" className={navLinkClass('/verify')} onClick={handleLinkClick}>
             <ShieldCheck size={18} />
-            <span>Verify</span>
+            <span>Xác minh</span>
           </Link>
         </nav>
 
