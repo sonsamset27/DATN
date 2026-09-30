@@ -245,13 +245,23 @@ export default function VerifyResultCard({ result, onReset }) {
         {/* DATA tab */}
         {tab === 'data' && (
           <div className="p-5 md:p-6 space-y-4">
+            {/* Selective Disclosure Info Banner */}
             {result.isSelectiveDisclosure && (
-              <div className="p-3.5 rounded-xl bg-violet-50/70 dark:bg-violet-950/30 border border-violet-200/80 dark:border-violet-800/60 text-xs text-violet-900 dark:text-violet-200 flex items-center gap-2.5">
-                <ShieldCheck size={16} className="text-violet-600 dark:text-violet-400 shrink-0" />
-                <span className="leading-relaxed">
-                  Người sở hữu đã chọn ẩn một số mục riêng tư. Các thông tin hiển thị còn lại đều khớp chính xác với dữ liệu gốc trên blockchain.
-                </span>
-              </div>
+              cfg.valid ? (
+                <div className="p-3.5 rounded-xl bg-violet-50/70 dark:bg-violet-950/30 border border-violet-200/80 dark:border-violet-800/60 text-xs text-violet-900 dark:text-violet-200 flex items-center gap-2.5">
+                  <ShieldCheck size={16} className="text-violet-600 dark:text-violet-400 shrink-0" />
+                  <span className="leading-relaxed">
+                    Người sở hữu đã chọn ẩn một số mục riêng tư. Các thông tin hiển thị còn lại đều khớp chính xác với dữ liệu gốc trên blockchain.
+                  </span>
+                </div>
+              ) : (
+                <div className="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-300 dark:border-rose-800 text-xs text-rose-900 dark:text-rose-200 flex items-center gap-2.5">
+                  <AlertTriangle size={16} className="text-rose-600 dark:text-rose-400 shrink-0" />
+                  <span className="leading-relaxed font-semibold">
+                    Cảnh báo: Dữ liệu chia sẻ đã bị can thiệp hoặc không khớp với mã băm trên Blockchain. Các thông tin hiển thị dưới đây KHÔNG CÓ GIÁ TRỊ XÁC THỰC!
+                  </span>
+                </div>
+              )
             )}
 
             {/* List with clean border & divider (shadcn card list) */}
@@ -263,12 +273,20 @@ export default function VerifyResultCard({ result, onReset }) {
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-mono font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">{k}</span>
                       {result.isSelectiveDisclosure && (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/60">
-                          Công khai
-                        </span>
+                        cfg.valid ? (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/60">
+                            Công khai
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 border border-rose-200/60 dark:border-rose-800/60">
+                            Không xác thực
+                          </span>
+                        )
                       )}
                     </div>
-                    <span className="text-sm font-semibold text-slate-900 dark:text-slate-100 break-all">{String(val)}</span>
+                    <span className={`text-sm font-semibold break-all ${cfg.valid ? 'text-slate-900 dark:text-slate-100' : 'text-rose-700 dark:text-rose-400 line-through opacity-75'}`}>
+                      {String(val)}
+                    </span>
                   </div>
                 );
               })}
