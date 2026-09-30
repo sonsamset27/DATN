@@ -220,8 +220,23 @@ export default function VerifyResultCard({ result, onReset }) {
                   ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-700'
                   : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600'
               }`}>
-                <ShieldCheck size={13} />
-                Trạng thái: {metadata.status === 'ACTIVE' ? 'Còn hiệu lực' : metadata.status === 'REVOKED' ? 'Đã thu hồi' : metadata.status === 'EXPIRED' ? 'Hết hạn' : 'Hợp lệ'}
+                {result.status === 'VERIFIED' || result.status === 'VERIFIED_SELECTIVE' ? (
+                  <ShieldCheck size={13} />
+                ) : result.status === 'EXPIRED' ? (
+                  <Clock size={13} />
+                ) : (
+                  <XCircle size={13} />
+                )}
+                Trạng thái:{' '}
+                {result.status === 'VERIFIED' || result.status === 'VERIFIED_SELECTIVE'
+                  ? 'Còn hiệu lực'
+                  : result.status === 'REVOKED'
+                  ? 'Đã thu hồi'
+                  : result.status === 'EXPIRED'
+                  ? 'Đã hết hạn'
+                  : result.status === 'TAMPERED'
+                  ? 'Dữ liệu không khớp'
+                  : 'Không hợp lệ'}
               </span>
             </div>
           </div>
