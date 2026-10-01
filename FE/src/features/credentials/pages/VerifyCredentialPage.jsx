@@ -94,12 +94,27 @@ function loadImage(file) {
 
 // ── Multi-scale & Contrast-enhanced QR Scanner from Image ──────────────────────
 async function scanQRFromImage(file) {
+  // Pass 0: Native BarcodeDetector (hardware-accelerated ML Kit / Vision framework)
+  if (typeof window !== 'undefined' && 'BarcodeDetector' in window) {
+    try {
+      const detector = new window.BarcodeDetector({ formats: ['qr_code'] });
+      const img = await loadImage(file);
+      const codes = await detector.detect(img);
+      if (codes && codes.length > 0 && codes[0].rawValue) {
+        return codes[0].rawValue;
+      }
+    } catch (e) {
+      console.warn('Native BarcodeDetector detect failed, falling back:', e);
+    }
+  }
+
+  // Pass 1: Multi-scale downsampling & contrast-enhanced jsQR
   try {
     const img = await loadImage(file);
     const origW = img.naturalWidth || img.width;
     const origH = img.naturalHeight || img.height;
 
-    // Test multiple resolutions (downsampling is key for phone photos with moire patterns)
+    // Test multiple resolutions (downsampling eliminates screen moire patterns)
     const maxDims = [1000, 750, 500, 1400, Math.max(origW, origH)];
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
@@ -114,11 +129,11 @@ async function scanQRFromImage(file) {
 
       const imgData = ctx.getImageData(0, 0, w, h);
 
-      // Pass 1: Raw image
+      // Pass 1.1: Raw
       const res1 = jsQR(imgData.data, w, h, { inversionAttempts: 'attemptBoth' });
       if (res1?.data) return res1.data;
 
-      // Pass 2: Grayscale & Contrast boost (helps photos of computer screens with glare)
+      // Pass 1.2: Grayscale & Contrast boost (resolves monitor glare)
       const d = imgData.data;
       for (let i = 0; i < d.length; i += 4) {
         const gray = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
@@ -130,7 +145,7 @@ async function scanQRFromImage(file) {
       const res2 = jsQR(d, w, h, { inversionAttempts: 'attemptBoth' });
       if (res2?.data) return res2.data;
 
-      // Pass 3: Hard binarization
+      // Pass 1.3: Hard binarization
       for (let i = 0; i < d.length; i += 4) {
         const val = d[i] > 128 ? 255 : 0;
         d[i] = val;
@@ -150,7 +165,7 @@ async function scanQRFromImage(file) {
     if (hiddenDiv) {
       const scanner = new Html5Qrcode('qr-file-hidden');
       const decoded = await scanner.scanFile(file, true);
-      scanner.clear();
+      try { scanner.clear(); } catch {}
       if (decoded) return decoded;
     }
   } catch {}
@@ -281,39 +296,81 @@ export default function VerifyCredentialPage() {
   const startScanner = useCallback(async () => {
     setMode('scan');
     setVerifyResult(null);
-    // Wait for DOM element
-    setTimeout(() => {
+
+    // Stop and clear any existing instance first
+    if (scannerRef.current) {
       try {
-        const scanner = new Html5Qrcode('qr-reader');
-        scannerRef.current = scanner;
-        // Mobile/tablet → rear cam, Desktop → front cam
-        const facingMode = mobile ? 'environment' : 'user';
-        scanner.start(
-          { facingMode },
-          { fps: 12, qrbox: { width: 240, height: 240 }, aspectRatio: 1 },
-          (decoded) => {
-            setCredentialId(decoded);
-            stopScanner(scanner);
-            handleVerify(decoded);
+        await scannerRef.current.stop();
+        scannerRef.current.clear();
+      } catch {}
+      scannerRef.current = null;
+    }
+
+    setTimeout(async () => {
+      try {
+        const qrElement = document.getElementById('qr-reader');
+        if (!qrElement) return;
+
+        const scanner = new Html5Qrcode('qr-reader', {
+          formatsToSupport: [0], // QR_CODE only: maximizes CPU efficiency & speed
+          verbose: false,
+          experimentalFeatures: {
+            useBarCodeDetectorIfSupported: true, // Native mobile GPU/hardware acceleration
           },
-          () => { }
-        ).catch(err => {
-          setMode('idle');
-          toast.error('Không thể mở camera: ' + (err?.message || err));
         });
-      } catch {
+        scannerRef.current = scanner;
+
+        // Mobile/tablet: prefer rear camera ('environment') with HD resolution (1280x720 or 1080p)
+        // High resolution is crucial for scanning dense Merkle QR codes from computer monitors
+        const cameraConfig = mobile
+          ? {
+              facingMode: 'environment',
+              width: { min: 640, ideal: 1280, max: 1920 },
+              height: { min: 480, ideal: 720, max: 1080 },
+            }
+          : {
+              facingMode: 'user',
+            };
+
+        const scanConfig = {
+          fps: 20, // 20 FPS gives fast recognition without thermal throttling
+          // NOTE: Do NOT constrain qrbox to a small crop box!
+          // Unconstrained qrbox allows Html5Qrcode to scan the ENTIRE camera frame,
+          // so users can point naturally from any distance or angle.
+        };
+
+        await scanner.start(
+          cameraConfig,
+          scanConfig,
+          (decoded) => {
+            if (decoded) {
+              setCredentialId(decoded);
+              stopScanner(scanner);
+              handleVerify(decoded);
+            }
+          },
+          () => {} // silent on continuous frame non-match
+        );
+      } catch (err) {
+        console.error('Camera start error:', err);
         setMode('idle');
-        toast.error('Lỗi khởi tạo camera');
+        toast.error('Không thể mở camera: ' + (err?.message || 'Vui lòng cấp quyền camera'));
       }
-    }, 200);
+    }, 250);
   }, [mobile, handleVerify]);
 
   const stopScanner = useCallback((instance = scannerRef.current) => {
-    if (instance) {
-      instance.stop().then(() => {
+    const target = instance || scannerRef.current;
+    if (target) {
+      target.stop().then(() => {
+        try { target.clear(); } catch {}
         scannerRef.current = null;
         setMode('idle');
-      }).catch(() => setMode('idle'));
+      }).catch(() => {
+        try { target.clear(); } catch {}
+        scannerRef.current = null;
+        setMode('idle');
+      });
     } else {
       setMode('idle');
     }
@@ -366,25 +423,25 @@ export default function VerifyCredentialPage() {
           {/* Camera scanner view */}
           {mode === 'scan' && (
             <div className="p-5 md:p-7 flex flex-col items-center gap-5">
-              <div className="relative w-full max-w-xs mx-auto">
+              <div className="relative w-full max-w-sm sm:max-w-md mx-auto">
                 {/* Scanning animation overlay */}
                 <div className="absolute inset-0 z-10 pointer-events-none rounded-2xl overflow-hidden">
                   <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent animate-[scan_2s_linear_infinite]" />
                   {/* Corner brackets */}
-                  {[['top-2 left-2', 'border-t-2 border-l-2'], ['top-2 right-2', 'border-t-2 border-r-2'],
-                  ['bottom-2 left-2', 'border-b-2 border-l-2'], ['bottom-2 right-2', 'border-b-2 border-r-2']]
+                  {[['top-3 left-3', 'border-t-2 border-l-2'], ['top-3 right-3', 'border-t-2 border-r-2'],
+                  ['bottom-3 left-3', 'border-b-2 border-l-2'], ['bottom-3 right-3', 'border-b-2 border-r-2']]
                     .map(([pos, bdr]) => (
-                      <div key={pos} className={`absolute ${pos} w-6 h-6 ${bdr} border-primary rounded-sm`} />
+                      <div key={pos} className={`absolute ${pos} w-7 h-7 ${bdr} border-primary rounded-sm`} />
                     ))}
                 </div>
-                <div id="qr-reader" className="w-full rounded-2xl overflow-hidden border-2 border-primary/40 shadow-inner" />
+                <div id="qr-reader" className="w-full rounded-2xl overflow-hidden border-2 border-primary/40 shadow-inner bg-black" />
               </div>
               <div className="text-center space-y-1">
                 <p className="text-sm font-semibold text-gray-700 dark:text-gray-200">
                   <Camera size={14} className="inline mr-1.5 text-primary" />
                   {mobile ? 'Camera sau đang hoạt động' : 'Webcam đang hoạt động'}
                 </p>
-                <p className="text-xs text-gray-400">Đưa mã QR vào khung hình để quét tự động</p>
+                <p className="text-xs text-gray-500">Giữ máy ổn định, hướng camera vào mã QR</p>
               </div>
               <button
                 onClick={() => stopScanner()}

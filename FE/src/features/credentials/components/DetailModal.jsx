@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { credentialsApi } from '../services/credentials.api';
 import { QRCodeSVG } from 'qrcode.react';
-import { Award, Share2, ShieldCheck, ShieldX, X, ExternalLink, Loader2 } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { Award, Share2, ShieldCheck, ShieldX, X, ExternalLink, Loader2, Maximize2, Copy, Check } from 'lucide-react';
 import StatusBadge from './StatusBadge';
 import CopyBtn from './CopyBtn';
 import SelectiveDisclosureModal from './SelectiveDisclosureModal';
@@ -10,6 +11,7 @@ import SelectiveDisclosureModal from './SelectiveDisclosureModal';
 export default function DetailModal({ cred, onClose }) {
   const [tab, setTab] = useState('info');
   const [showQR, setShowQR] = useState(false);
+  const [qrZoomed, setQrZoomed] = useState(false);
   const [showSD, setShowSD] = useState(false);
 
   const { data: detailRes, isLoading } = useQuery({
@@ -204,27 +206,61 @@ export default function DetailModal({ cred, onClose }) {
       {/* QR popup */}
       {showQR && (
         <div
-          className="absolute inset-0 flex items-center justify-center"
-          style={{ backdropFilter: 'blur(6px)', background: 'rgba(0,0,0,0.5)' }}
-          onMouseDown={(e) => { if (e.target === e.currentTarget) setShowQR(false); }}
+          className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fadeIn"
+          onMouseDown={(e) => { if (e.target === e.currentTarget) { setShowQR(false); setQrZoomed(false); } }}
         >
-          <div className="bg-white dark:bg-gray-800 rounded-3xl p-8 text-center shadow-2xl w-80 relative">
-            <button onClick={() => setShowQR(false)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+          <div className="bg-white dark:bg-gray-900 rounded-3xl p-6 sm:p-7 text-center shadow-2xl max-w-sm sm:max-w-md w-full relative border border-gray-100 dark:border-gray-800">
+            <button
+              onClick={() => { setShowQR(false); setQrZoomed(false); }}
+              className="absolute top-4 right-4 p-2 rounded-xl text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            >
               <X size={20} />
             </button>
-            <h3 className="font-bold text-lg mb-1">Mã QR chứng chỉ</h3>
-            <p className="text-xs text-gray-500 mb-6 line-clamp-2">{cred.templateName || 'Chứng chỉ số'}</p>
-            <div className="bg-white p-3 rounded-2xl inline-block shadow-inner mx-auto mb-4">
+            <h3 className="font-bold text-lg mb-0.5 text-gray-900 dark:text-white">Mã QR chứng chỉ</h3>
+            <p className="text-xs text-gray-500 mb-4 line-clamp-1">{cred.templateName || 'Chứng chỉ số'}</p>
+            
+            <div 
+              onClick={() => setQrZoomed(!qrZoomed)}
+              className="bg-white p-4 rounded-3xl inline-block shadow-inner mx-auto mb-3 border border-gray-100 cursor-pointer group hover:border-violet-400 transition-all relative"
+              title="Nhấn để phóng to hoặc thu nhỏ"
+            >
               <QRCodeSVG
+                id="standard-cred-qr"
                 value={`${window.location.origin}/verify?id=${encodeURIComponent(cred.credentialId)}`}
-                size={220}
+                size={qrZoomed ? 330 : 260}
                 bgColor="#ffffff"
-                fgColor="#1a1a2e"
-                level="L"
+                fgColor="#000000"
+                level="M"
                 includeMargin={true}
               />
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-3xl flex items-center justify-center text-white gap-1.5 text-xs font-semibold backdrop-blur-[2px]">
+                <Maximize2 size={16} /> {qrZoomed ? 'Thu nhỏ lại' : 'Phóng to mã QR'}
+              </div>
             </div>
-            <p className="text-[10px] text-gray-400 font-mono break-all bg-gray-50 dark:bg-gray-900 p-2 rounded-xl">
+
+            <p className="text-[11px] text-gray-500 dark:text-gray-400 mb-4">
+              {qrZoomed ? 'Đã phóng to tối đa — Điện thoại dễ dàng nhận diện từ xa' : 'Đưa camera điện thoại lại gần hoặc nhấn vào mã để phóng to'}
+            </p>
+
+            <div className="flex gap-2 justify-center">
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(`${window.location.origin}/verify?id=${encodeURIComponent(cred.credentialId)}`);
+                  toast.success('Đã sao chép liên kết xác thực!');
+                }}
+                className="px-3.5 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-md shadow-violet-600/20 transition-all"
+              >
+                <Copy size={13} /> Sao chép link
+              </button>
+              <button
+                onClick={() => setQrZoomed(!qrZoomed)}
+                className="px-3.5 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors"
+              >
+                <Maximize2 size={13} /> {qrZoomed ? 'Thu nhỏ' : 'Phóng to'}
+              </button>
+            </div>
+            
+            <p className="text-[10px] text-gray-400 font-mono break-all bg-gray-50 dark:bg-gray-800/60 p-2 rounded-xl mt-3">
               {cred.credentialId}
             </p>
           </div>

@@ -4,7 +4,7 @@ import { MerkleUtil } from '../../../lib/merkle.util';
 import toast from 'react-hot-toast';
 import {
   ShieldCheck, Eye, X, Copy, Check, Share2, Lock,
-  Sparkles, CheckCircle2, ArrowRight, ExternalLink
+  Sparkles, CheckCircle2, ArrowRight, ExternalLink, Maximize2
 } from 'lucide-react';
 
 export default function SelectiveDisclosureModal({ cred, detail, onClose }) {
@@ -17,6 +17,7 @@ export default function SelectiveDisclosureModal({ cred, detail, onClose }) {
   const [generatedPackage, setGeneratedPackage] = useState(null);
   const [copied, setCopied] = useState(false);
   const [activeTab, setActiveTab] = useState('select'); // 'select' | 'share'
+  const [isZoomed, setIsZoomed] = useState(false);
 
   const toggleKey = (key) => {
     setSelectedKeys((prev) => {
@@ -280,20 +281,37 @@ export default function SelectiveDisclosureModal({ cred, detail, onClose }) {
           {activeTab === 'share' && generatedPackage && (
             <div className="space-y-6 text-center">
               {/* QR display */}
-              <div className="p-4 bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-lg inline-block mx-auto">
-                <div className="bg-white p-3 rounded-2xl shadow-inner">
-                  <QRCodeSVG
-                    value={shareUrl}
-                    size={240}
-                    bgColor="#ffffff"
-                    fgColor="#0f172a"
-                    level="L"
-                    includeMargin={true}
-                  />
+              <div className="relative inline-block mx-auto">
+                <div
+                  onClick={() => setIsZoomed(true)}
+                  className="p-4 bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-lg cursor-pointer group hover:border-violet-400 transition-all"
+                  title="Bấm để phóng to mã QR"
+                >
+                  <div className="bg-white p-3 rounded-2xl shadow-inner relative">
+                    <QRCodeSVG
+                      value={shareUrl}
+                      size={280}
+                      bgColor="#ffffff"
+                      fgColor="#000000"
+                      level="L"
+                      includeMargin={true}
+                    />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl flex items-center justify-center text-white gap-1.5 text-xs font-semibold backdrop-blur-[2px]">
+                      <Maximize2 size={16} /> Phóng to mã QR
+                    </div>
+                  </div>
+                  <div className="mt-2.5 flex items-center justify-center gap-3">
+                    <p className="text-[11px] font-semibold text-slate-600 dark:text-slate-300 flex items-center gap-1">
+                      <CheckCircle2 size={13} className="text-emerald-500" /> Quét mã để xác thực
+                    </p>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setIsZoomed(true); }}
+                      className="text-[11px] text-violet-600 dark:text-violet-400 font-semibold hover:underline flex items-center gap-1"
+                    >
+                      <Maximize2 size={11} /> Phóng to
+                    </button>
+                  </div>
                 </div>
-                <p className="text-[11px] font-semibold text-slate-600 dark:text-slate-300 mt-2 flex items-center justify-center gap-1">
-                  <CheckCircle2 size={13} className="text-emerald-500" /> Quét mã để xác thực chứng chỉ
-                </p>
               </div>
 
               {/* Summary of Disclosure */}
@@ -383,6 +401,52 @@ export default function SelectiveDisclosureModal({ cred, detail, onClose }) {
         )}
 
       </div>
+
+      {/* Fullscreen Magnified QR Modal */}
+      {isZoomed && (
+        <div
+          className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn"
+          onClick={() => setIsZoomed(false)}
+        >
+          <div
+            className="bg-white dark:bg-gray-900 rounded-3xl p-6 sm:p-8 max-w-sm sm:max-w-md w-full text-center shadow-2xl relative border border-gray-100 dark:border-gray-800"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setIsZoomed(false)}
+              className="absolute top-4 right-4 p-2 rounded-xl text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            >
+              <X size={20} />
+            </button>
+            <h3 className="font-bold text-lg mb-1 text-gray-900 dark:text-white">Mã QR xác thực (Phóng to)</h3>
+            <p className="text-xs text-gray-500 mb-5">Đưa camera điện thoại lại gần màn hình để quét ngay</p>
+            <div className="bg-white p-4 rounded-3xl inline-block shadow-inner mx-auto mb-4 border border-gray-100">
+              <QRCodeSVG
+                value={shareUrl}
+                size={340}
+                bgColor="#ffffff"
+                fgColor="#000000"
+                level="L"
+                includeMargin={true}
+              />
+            </div>
+            <div className="flex gap-2 justify-center">
+              <button
+                onClick={handleCopyLink}
+                className="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-md shadow-violet-600/20 transition-all"
+              >
+                <Copy size={13} /> {copied ? 'Đã sao chép' : 'Sao chép link'}
+              </button>
+              <button
+                onClick={() => setIsZoomed(false)}
+                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-xl text-xs font-semibold transition-colors"
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
