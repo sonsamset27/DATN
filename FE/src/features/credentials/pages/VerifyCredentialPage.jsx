@@ -294,6 +294,12 @@ export default function VerifyCredentialPage() {
 
   // ── QR Camera ──
   const startScanner = useCallback(async () => {
+    // Check MediaDevices support upfront (especially for insecure HTTP contexts on mobile)
+    if (typeof navigator === 'undefined' || !navigator.mediaDevices?.getUserMedia) {
+      toast.error('Trình duyệt không hỗ trợ mở camera trực tiếp (yêu cầu kết nối HTTPS hoặc localhost). Bạn có thể dùng tính năng Tải ảnh QR.');
+      return;
+    }
+
     setMode('scan');
     setVerifyResult(null);
 
@@ -320,41 +326,51 @@ export default function VerifyCredentialPage() {
         });
         scannerRef.current = scanner;
 
-        // Mobile/tablet: prefer rear camera ('environment') with HD resolution (1280x720 or 1080p)
-        // High resolution is crucial for scanning dense Merkle QR codes from computer monitors
-        const cameraConfig = mobile
-          ? {
-              facingMode: 'environment',
-              width: { min: 640, ideal: 1280, max: 1920 },
-              height: { min: 480, ideal: 720, max: 1080 },
-            }
-          : {
-              facingMode: 'user',
-            };
-
+        // html5-qrcode strictly requires cameraIdOrConfig object to have EXACTLY 1 key:
+        // { facingMode: 'environment' } or { facingMode: 'user' }
+        const primaryFacingMode = mobile ? 'environment' : 'user';
         const scanConfig = {
-          fps: 20, // 20 FPS gives fast recognition without thermal throttling
-          // NOTE: Do NOT constrain qrbox to a small crop box!
-          // Unconstrained qrbox allows Html5Qrcode to scan the ENTIRE camera frame,
-          // so users can point naturally from any distance or angle.
+          fps: 15, // 15 FPS: optimal balance between responsiveness and smooth battery consumption
         };
 
-        await scanner.start(
-          cameraConfig,
-          scanConfig,
-          (decoded) => {
-            if (decoded) {
-              setCredentialId(decoded);
-              stopScanner(scanner);
-              handleVerify(decoded);
-            }
-          },
-          () => {} // silent on continuous frame non-match
-        );
+        const handleSuccess = (decoded) => {
+          if (decoded) {
+            setCredentialId(decoded);
+            stopScanner(scanner);
+            handleVerify(decoded);
+          }
+        };
+
+        try {
+          await scanner.start(
+            { facingMode: primaryFacingMode },
+            scanConfig,
+            handleSuccess,
+            () => {} // silent on continuous frame non-match
+          );
+        } catch (firstErr) {
+          console.warn('[Camera] Primary facingMode failed, falling back:', firstErr);
+          // If environment camera failed or device has only 1 camera, fallback to user camera
+          await scanner.start(
+            { facingMode: 'user' },
+            scanConfig,
+            handleSuccess,
+            () => {}
+          );
+        }
       } catch (err) {
         console.error('Camera start error:', err);
         setMode('idle');
-        toast.error('Không thể mở camera: ' + (err?.message || 'Vui lòng cấp quyền camera'));
+        const errStr = String(err?.message || err || '');
+        if (errStr.includes('Permission') || errStr.includes('NotAllowedError') || errStr.includes('denied')) {
+          toast.error('Quyền truy cập camera bị từ chối. Vui lòng cho phép quyền camera trong cài đặt trình duyệt.');
+        } else if (errStr.includes('NotFound') || errStr.includes('DevicesNotFoundError')) {
+          toast.error('Không tìm thấy thiết bị camera.');
+        } else if (errStr.includes('NotReadableError') || errStr.includes('TrackStartError')) {
+          toast.error('Camera đang bị ứng dụng khác sử dụng.');
+        } else {
+          toast.error('Không thể mở camera: ' + (errStr || 'Vui lòng kiểm tra quyền thiết bị'));
+        }
       }
     }, 250);
   }, [mobile, handleVerify]);
