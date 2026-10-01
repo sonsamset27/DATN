@@ -8,6 +8,17 @@ import CopyBtn from './CopyBtn';
 import InfoRow from './InfoRow';
 
 const STATUS_CONFIG = {
+  ACTIVE: {
+    valid: true,
+    title: 'Chứng chỉ hợp lệ',
+    subtitle: 'Dữ liệu toàn vẹn, đã được xác minh thành công trên blockchain Sepolia.',
+    gradient: 'from-emerald-600 via-teal-600 to-cyan-700',
+    gradientLight: 'from-emerald-50 to-teal-50 dark:from-emerald-950/40 dark:to-teal-950/30',
+    border: 'border-emerald-200 dark:border-emerald-800',
+    ring: 'ring-emerald-400/30',
+    badgeCls: 'bg-white/20 text-white border-white/30',
+    icon: CheckCircle2,
+  },
   VERIFIED_SELECTIVE: {
     valid: true,
     title: 'Xác thực thành công',

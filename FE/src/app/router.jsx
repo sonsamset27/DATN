@@ -11,7 +11,7 @@ import UsersListPage from '../features/users/pages/UsersListPage';
 import MyDIDPage from '../features/dids/pages/MyDIDPage';
 import TemplatesListPage from '../features/templates/pages/TemplatesListPage';
 import MyCredentialsPage from '../features/credentials/pages/MyCredentialsPage';
-import VerifyCredentialPage from '../features/credentials/pages/VerifyCredentialPage';
+import PublicVerifyPage from '../features/credentials/pages/PublicVerifyPage';
 import IssuedCredentialsPage from '../features/credentials/pages/IssuedCredentialsPage';
 import IssueCredentialPage from '../features/credentials/pages/IssueCredentialPage';
 import AuditLogsPage from '../features/audit-logs/pages/AuditLogsPage';
@@ -29,6 +29,10 @@ export const router = createBrowserRouter([
         element: <GuestDashboardPage />
       },
       {
+        path: 'verify',
+        element: <PublicVerifyPage />
+      },
+      {
         element: <MainLayout />,
         children: [
           { path: 'dashboard', element: <DashboardPage /> },
@@ -39,7 +43,6 @@ export const router = createBrowserRouter([
           { path: 'issued-credentials', element: <IssuedCredentialsPage /> },
           { path: 'issue-credential', element: <IssueCredentialPage /> },
           { path: 'audit-logs', element: <AuditLogsPage /> },
-          { path: 'verify', element: <VerifyCredentialPage /> },
         ]
       },
       {

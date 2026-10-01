@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { credentialsApi } from '../services/credentials.api';
 import { Html5Qrcode } from 'html5-qrcode';
+import jsQR from 'jsqr';
 import toast from 'react-hot-toast';
 import {
   ShieldCheck, ScanLine, XCircle, Loader2, ImageUp, Camera, Upload, Hash
@@ -17,7 +18,147 @@ function isMobileOrTablet() {
     || (navigator.maxTouchPoints && navigator.maxTouchPoints > 2);
 }
 
-// ─── Main Page ─────────────────────────────────────────────────────────────────
+// ── Bulletproof Selective Disclosure Parser ───────────────────────────────────
+function parseSelectiveDisclosure(raw) {
+  if (!raw) return null;
+  const str = String(raw).trim();
+
+  // If raw JSON string
+  if (str.startsWith('{') && str.endsWith('}')) {
+    try {
+      const parsed = JSON.parse(str);
+      if (parsed && (parsed.revealed || parsed.merkleRoot)) return parsed;
+    } catch {}
+  }
+
+  // Extract base64 candidate from URL or query
+  let b64 = str;
+  if (str.includes('sd=')) {
+    try {
+      const urlObj = new URL(str.startsWith('http') ? str : `http://dummy.com/${str}`);
+      b64 = urlObj.searchParams.get('sd') || '';
+    } catch {
+      const match = str.match(/sd=([^&]+)/);
+      if (match) b64 = match[1];
+    }
+  }
+
+  if (!b64) return null;
+
+  // Restore standard Base64 characters if spaces or URL-safe chars are present
+  let cleanB64 = decodeURIComponent(b64).trim().replace(/ /g, '+');
+  cleanB64 = cleanB64.replace(/-/g, '+').replace(/_/g, '/');
+  while (cleanB64.length % 4 !== 0) {
+    cleanB64 += '=';
+  }
+
+  // Try decoding UTF-8 bytes from binary string
+  try {
+    const binary = atob(cleanB64);
+    try {
+      const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
+      const text = new TextDecoder().decode(bytes);
+      const parsed = JSON.parse(text);
+      if (parsed && (parsed.revealed || parsed.merkleRoot)) return parsed;
+    } catch {
+      const parsed = JSON.parse(decodeURIComponent(escape(binary)));
+      if (parsed && (parsed.revealed || parsed.merkleRoot)) return parsed;
+    }
+  } catch (e) {
+    // Fallback: direct decodeURIComponent then JSON
+    try {
+      const parsed = JSON.parse(decodeURIComponent(str));
+      if (parsed && (parsed.revealed || parsed.merkleRoot)) return parsed;
+    } catch {}
+  }
+
+  return null;
+}
+
+// ── Load image file into an HTMLImageElement ──────────────────────────────────
+function loadImage(file) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      resolve(img);
+    };
+    img.onerror = (err) => {
+      URL.revokeObjectURL(url);
+      reject(err);
+    };
+    img.src = url;
+  });
+}
+
+// ── Multi-scale & Contrast-enhanced QR Scanner from Image ──────────────────────
+async function scanQRFromImage(file) {
+  try {
+    const img = await loadImage(file);
+    const origW = img.naturalWidth || img.width;
+    const origH = img.naturalHeight || img.height;
+
+    // Test multiple resolutions (downsampling is key for phone photos with moire patterns)
+    const maxDims = [1000, 750, 500, 1400, Math.max(origW, origH)];
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+    for (const maxDim of maxDims) {
+      const scale = Math.min(1, maxDim / Math.max(origW, origH));
+      const w = Math.round(origW * scale);
+      const h = Math.round(origH * scale);
+      canvas.width = w;
+      canvas.height = h;
+      ctx.drawImage(img, 0, 0, w, h);
+
+      const imgData = ctx.getImageData(0, 0, w, h);
+
+      // Pass 1: Raw image
+      const res1 = jsQR(imgData.data, w, h, { inversionAttempts: 'attemptBoth' });
+      if (res1?.data) return res1.data;
+
+      // Pass 2: Grayscale & Contrast boost (helps photos of computer screens with glare)
+      const d = imgData.data;
+      for (let i = 0; i < d.length; i += 4) {
+        const gray = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+        const val = gray > 125 ? Math.min(255, gray + 45) : Math.max(0, gray - 45);
+        d[i] = val;
+        d[i + 1] = val;
+        d[i + 2] = val;
+      }
+      const res2 = jsQR(d, w, h, { inversionAttempts: 'attemptBoth' });
+      if (res2?.data) return res2.data;
+
+      // Pass 3: Hard binarization
+      for (let i = 0; i < d.length; i += 4) {
+        const val = d[i] > 128 ? 255 : 0;
+        d[i] = val;
+        d[i + 1] = val;
+        d[i + 2] = val;
+      }
+      const res3 = jsQR(d, w, h, { inversionAttempts: 'attemptBoth' });
+      if (res3?.data) return res3.data;
+    }
+  } catch (err) {
+    console.warn('[scanQRFromImage] jsQR multi-scale pass failed, falling back:', err);
+  }
+
+  // Fallback to Html5Qrcode.scanFile
+  try {
+    const hiddenDiv = document.getElementById('qr-file-hidden');
+    if (hiddenDiv) {
+      const scanner = new Html5Qrcode('qr-file-hidden');
+      const decoded = await scanner.scanFile(file, true);
+      scanner.clear();
+      if (decoded) return decoded;
+    }
+  } catch {}
+
+  return null;
+}
+
+// ── Main Page ─────────────────────────────────────────────────────────────────
 export default function VerifyCredentialPage() {
   const [searchParams] = useSearchParams();
   const [credentialId, setCredentialId] = useState('');
@@ -71,44 +212,45 @@ export default function VerifyCredentialPage() {
     const raw = (idToVerify ?? credentialId).trim();
     if (!raw) return toast.error('Vui lòng nhập Credential ID hoặc liên kết xác thực');
 
-    // Case A: User pastes a Selective Disclosure URL (containing ?sd=...)
-    if (raw.includes('sd=')) {
-      try {
-        const urlObj = new URL(raw.startsWith('http') ? raw : `http://dummy.com/${raw}`);
-        const sdParam = urlObj.searchParams.get('sd');
-        if (sdParam) {
-          const decoded = JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(sdParam)))));
-          return handleVerifySelective(decoded);
-        }
-      } catch (err) {
-        console.error('Failed to parse SD URL:', err);
-      }
+    // Case A: Selective Disclosure (URL or JSON or base64 string)
+    const sdPayload = parseSelectiveDisclosure(raw);
+    if (sdPayload) {
+      return handleVerifySelective(sdPayload);
     }
 
-    // Case B: User pastes raw JSON package
-    if (raw.startsWith('{') && raw.endsWith('}')) {
+    // Case B: Standard ID from URL (e.g. http://localhost:5173/verify?id=KMA-001)
+    let targetId = raw;
+    if (raw.includes('id=')) {
       try {
-        const parsed = JSON.parse(raw);
-        if (parsed.revealed && parsed.merkleRoot) {
-          return handleVerifySelective(parsed);
-        }
+        const urlObj = new URL(raw.startsWith('http') ? raw : `http://dummy.com/${raw}`);
+        const idParam = urlObj.searchParams.get('id');
+        if (idParam) targetId = idParam;
       } catch (err) {
-        console.error('Failed to parse SD JSON:', err);
+        console.error('Failed to parse ID URL:', err);
       }
+    } else if (raw.startsWith('http')) {
+      try {
+        const urlObj = new URL(raw);
+        const parts = urlObj.pathname.split('/').filter(Boolean);
+        if (parts.length > 0 && parts[parts.length - 1] !== 'verify') {
+          targetId = parts[parts.length - 1];
+        }
+      } catch {}
     }
 
     // Case C: Standard Credential ID verification
     try {
       setIsVerifying(true);
       setVerifyResult(null);
-      const res = await credentialsApi.verifyCredential(raw);
+      const res = await credentialsApi.verifyCredential(targetId);
       setVerifyResult(res.data);
+      setCredentialId(targetId);
     } catch (err) {
       const msg = err?.response?.data?.message || err?.message || 'Chứng chỉ không hợp lệ';
       setVerifyResult({
         status: 'INVALID',
         isValid: false,
-        metadata: { credentialId: raw },
+        metadata: { credentialId: targetId },
         subjectData: {},
         blockchainProof: {},
         error: msg,
@@ -123,10 +265,10 @@ export default function VerifyCredentialPage() {
     const sdParam = searchParams.get('sd');
     const idParam = searchParams.get('id');
     if (sdParam) {
-      try {
-        const decoded = JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(sdParam)))));
-        handleVerifySelective(decoded);
-      } catch {
+      const payload = parseSelectiveDisclosure(sdParam);
+      if (payload) {
+        handleVerifySelective(payload);
+      } else {
         toast.error('Liên kết xác thực không hợp lệ');
       }
     } else if (idParam) {
@@ -181,14 +323,16 @@ export default function VerifyCredentialPage() {
   const handleFileQR = useCallback(async (file) => {
     setIsReadingQR(true);
     try {
-      // Use a temporary div (not in the DOM) via Html5Qrcode.scanFile
-      const tmp = new Html5Qrcode('qr-file-hidden');
-      const decoded = await tmp.scanFile(file, true);
-      tmp.clear();
+      const decoded = await scanQRFromImage(file);
+      if (!decoded) {
+        throw new Error('Không tìm thấy mã QR trong ảnh');
+      }
       setCredentialId(decoded);
+      setMode('idle');
       handleVerify(decoded);
-    } catch {
-      toast.error('Không thể đọc mã QR từ ảnh. Vui lòng chọn ảnh QR rõ nét hơn.');
+    } catch (err) {
+      console.warn('QR image scan failed:', err);
+      toast.error('Không thể đọc mã QR từ ảnh. Vui lòng căn chỉnh lại góc chụp hoặc độ nét.');
     } finally {
       setIsReadingQR(false);
     }

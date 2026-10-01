@@ -7,7 +7,7 @@ import { queryClient } from '../../lib/queryClient';
 import logo from '../../assets/images/logo_datn.png';
 import { useState } from 'react';
 
-export default function MainLayout() {
+export default function MainLayout({ children }) {
   const { isAuthenticated, logout, user } = useAuthStore();
   const { disconnect } = useDisconnect();
   const location = useLocation();
@@ -185,7 +185,7 @@ export default function MainLayout() {
         </header>
 
         <main className="flex-1 overflow-x-hidden overflow-y-auto p-3 sm:p-5 lg:p-8 text-foreground bg-background">
-          <Outlet />
+          {children || <Outlet />}
         </main>
       </div>
     </div>

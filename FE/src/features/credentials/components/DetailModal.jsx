@@ -216,11 +216,12 @@ export default function DetailModal({ cred, onClose }) {
             <p className="text-xs text-gray-500 mb-6 line-clamp-2">{cred.templateName || 'Chứng chỉ số'}</p>
             <div className="bg-white p-3 rounded-2xl inline-block shadow-inner mx-auto mb-4">
               <QRCodeSVG
-                value={cred.credentialId}
-                size={200}
+                value={`${window.location.origin}/verify?id=${encodeURIComponent(cred.credentialId)}`}
+                size={220}
                 bgColor="#ffffff"
                 fgColor="#1a1a2e"
-                level="Q"
+                level="L"
+                includeMargin={true}
               />
             </div>
             <p className="text-[10px] text-gray-400 font-mono break-all bg-gray-50 dark:bg-gray-900 p-2 rounded-xl">

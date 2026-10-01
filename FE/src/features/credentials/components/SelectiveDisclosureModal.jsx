@@ -54,10 +54,6 @@ export default function SelectiveDisclosureModal({ cred, detail, onClose }) {
       
       const fullPayload = {
         credentialId: cred.credentialId,
-        templateName: cred.templateName || detail?.templateName || 'Chứng chỉ số',
-        issuerDid: cred.issuerDid,
-        holderDid: detail?.metadata?.holderDid || cred.holderDid,
-        issuedAt: cred.issuedAt,
         revealed: sdPackage.revealed,
         salts: sdPackage.salts,
         hidden: sdPackage.hidden,
@@ -75,8 +71,12 @@ export default function SelectiveDisclosureModal({ cred, detail, onClose }) {
   const shareUrl = useMemo(() => {
     if (!generatedPackage) return '';
     const jsonStr = JSON.stringify(generatedPackage);
-    // Base64 encode safe for URL
-    const b64 = btoa(unescape(encodeURIComponent(jsonStr)));
+    const utf8Bytes = new TextEncoder().encode(jsonStr);
+    let binary = '';
+    for (let i = 0; i < utf8Bytes.length; i++) {
+      binary += String.fromCharCode(utf8Bytes[i]);
+    }
+    const b64 = btoa(binary);
     return `${window.location.origin}/verify?sd=${encodeURIComponent(b64)}`;
   }, [generatedPackage]);
 
@@ -284,10 +284,11 @@ export default function SelectiveDisclosureModal({ cred, detail, onClose }) {
                 <div className="bg-white p-3 rounded-2xl shadow-inner">
                   <QRCodeSVG
                     value={shareUrl}
-                    size={210}
+                    size={240}
                     bgColor="#ffffff"
-                    fgColor="#1e1b4b"
-                    level="M"
+                    fgColor="#0f172a"
+                    level="L"
+                    includeMargin={true}
                   />
                 </div>
                 <p className="text-[11px] font-semibold text-slate-600 dark:text-slate-300 mt-2 flex items-center justify-center gap-1">
